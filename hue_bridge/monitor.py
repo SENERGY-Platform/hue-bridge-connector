@@ -58,6 +58,7 @@ class Monitor(Thread):
                 unknown_lights[light_id] = light
         else:
             logger.error("could not query lights - '{}'".format(response.status))
+        """
         response = http.get(
             'http://{}:{}/{}/{}/groups'.format(
                 BRIDGE_HOST,
@@ -74,6 +75,7 @@ class Monitor(Thread):
                 unknown_groups[group_key] = group
         else:
             logger.error("could not query groups - '{}'".format(response.status))
+        """
         return unknown_lights, unknown_groups
 
 
@@ -88,7 +90,7 @@ class Monitor(Thread):
 
     def _evaluate(self, unknown_devices, unknown_groups, init):
         missing_devices, new_devices, changed_devices = self._diff(__class__._known_devices, unknown_devices)
-        missing_groups, new_groups, changed_groups = self._diff(__class__._known_groups, unknown_groups)
+        #missing_groups, new_groups, changed_groups = self._diff(__class__._known_groups, unknown_groups)
         if missing_devices:
             for missing_device_id in missing_devices:
                 logger.info("can't find '{}' with id '{}'".format(__class__._known_devices[missing_device_id].get('name'), missing_device_id))
@@ -102,7 +104,7 @@ class Monitor(Thread):
                 name = unknown_devices[new_device_id].get('name')
                 logger.info("found '{}' with id '{}'".format(name, new_device_id))
                 __class__.bridge_map[new_device_id] = unknown_devices[new_device_id].get('LIGHT_KEY')
-                device = Device(new_device_id, 'iot#9d5a8a4e-8f98-46fa-931a-a8598353fe04', name)
+                device = Device(new_device_id, 'iot#f730843d-ca6b-48f4-a58b-c53a7f7ee062', name)
                 device.addTag('type', unknown_devices[new_device_id].get('type'))
                 device.addTag('manufacturer', unknown_devices[new_device_id].get('manufacturername'))
                 if init:
@@ -120,6 +122,7 @@ class Monitor(Thread):
                     else:
                         Client.update(device)
                     logger.info("name of '{}' changed to {}".format(changed_device_id, name))
+        """
         if missing_groups:
             for missing_group_id in missing_groups:
                 logger.info(
@@ -152,5 +155,6 @@ class Monitor(Thread):
                     else:
                         Client.update(device_group)
                     logger.info("name of '{}' changed to {}".format(changed_group_id, name))
+        """
         __class__._known_devices = unknown_devices
-        __class__._known_groups = unknown_groups
+        #__class__._known_groups = unknown_groups
