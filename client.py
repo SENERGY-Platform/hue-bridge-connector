@@ -23,8 +23,9 @@ def bridgeController():
         if Monitor.bridge_map:
             task = Client.receive()
             try:
-                command = task.payload.get('protocol_parts')
-                command = command[0].get('value')
+                for part in task.payload.get('protocol_parts'):
+                    if part.get('name') == 'data':
+                        command = part.get('value')
                 if 'group_action' in task.payload.get('service_url'):
                     http_resp = http.put(
                         'http://{}:{}/{}/{}/groups/{}/action'.format(
@@ -54,7 +55,7 @@ def bridgeController():
                 response = str(http_resp.status)
             except Exception as ex:
                 logger.error("error handling task - '{}'".format(ex))
-                response = str(ex)
+                response = '500'
             Client.response(task, response)
         else:
             logger.debug("waiting for device map to be populated")

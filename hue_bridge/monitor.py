@@ -104,7 +104,7 @@ class Monitor(Thread):
                 name = unknown_devices[new_device_id].get('name')
                 logger.info("found '{}' with id '{}'".format(name, new_device_id))
                 __class__.bridge_map[new_device_id] = unknown_devices[new_device_id].get('LIGHT_KEY')
-                device = Device(new_device_id, 'iot#f730843d-ca6b-48f4-a58b-c53a7f7ee062', name)
+                device = Device(new_device_id, 'iot#58b47359-a3fe-4e5a-84a2-08bf7b83395d', name)
                 device.addTag('type', unknown_devices[new_device_id].get('type'))
                 device.addTag('manufacturer', unknown_devices[new_device_id].get('manufacturername'))
                 if init:
