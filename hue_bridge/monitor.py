@@ -3,11 +3,11 @@ if __name__ == '__main__':
 
 try:
     from modules.http_lib import Methods as http
-    from modules.logger import root_logger
     from connector.client import Client
     from connector.device import Device
     from hue_bridge.configuration import BRIDGE_API_KEY, BRIDGE_API_PATH, BRIDGE_HOST, BRIDGE_PORT
     from modules.device_pool import DevicePool
+    from hue_bridge.logger import root_logger
 except ImportError as ex:
     exit("{} - {}".format(__name__, ex.msg))
 import json, time
