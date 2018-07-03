@@ -8,6 +8,7 @@ try:
     from hue_bridge.configuration import BRIDGE_API_KEY, BRIDGE_API_PATH, BRIDGE_HOST, BRIDGE_PORT
     from modules.device_pool import DevicePool
     from hue_bridge.logger import root_logger
+    from rgbxy import Converter, get_light_gamut
 except ImportError as ex:
     exit("{} - {}".format(__name__, ex.msg))
 import json, time
@@ -24,7 +25,7 @@ class Monitor(Thread):
 
     def __init__(self):
         super().__init__()
-        unknown_devices, unknown_groups = self._queryDeconz()
+        unknown_devices, unknown_groups = self._queryBridge()
         if unknown_devices or unknown_groups:
             self._evaluate(unknown_devices, unknown_groups, True)
         self.start()
@@ -33,12 +34,12 @@ class Monitor(Thread):
     def run(self):
         while True:
             time.sleep(30)
-            unknown_devices, unknown_groups = self._queryDeconz()
+            unknown_devices, unknown_groups = self._queryBridge()
             if unknown_devices or unknown_groups:
                 self._evaluate(unknown_devices, unknown_groups, False)
 
 
-    def _queryDeconz(self):
+    def _queryBridge(self):
         unknown_lights = dict()
         unknown_groups = dict()
         response = http.get(
@@ -103,7 +104,7 @@ class Monitor(Thread):
             for new_device_id in new_devices:
                 name = unknown_devices[new_device_id].get('name')
                 logger.info("found '{}' with id '{}'".format(name, new_device_id))
-                __class__.bridge_map[new_device_id] = unknown_devices[new_device_id].get('LIGHT_KEY')
+                __class__.bridge_map[new_device_id] = (unknown_devices[new_device_id].get('LIGHT_KEY'), Converter(get_light_gamut(unknown_devices[new_device_id].get('modelid'))))
                 device = Device(new_device_id, 'iot#58b47359-a3fe-4e5a-84a2-08bf7b83395d', name)
                 device.addTag('type', unknown_devices[new_device_id].get('type'))
                 device.addTag('manufacturer', unknown_devices[new_device_id].get('manufacturername'))

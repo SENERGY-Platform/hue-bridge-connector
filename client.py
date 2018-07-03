@@ -13,6 +13,7 @@ try:
 except ImportError as ex:
     exit("{} - {}".format(__name__, ex.msg))
 from time import sleep
+import json
 
 
 logger = root_logger.getChild(__name__)
@@ -26,30 +27,23 @@ def bridgeController():
                 for part in task.payload.get('protocol_parts'):
                     if part.get('name') == 'data':
                         command = part.get('value')
-                if 'group_action' in task.payload.get('service_url'):
-                    http_resp = http.put(
-                        'http://{}:{}/{}/{}/groups/{}/action'.format(
-                            BRIDGE_HOST,
-                            BRIDGE_PORT,
-                            BRIDGE_API_PATH,
-                            BRIDGE_API_KEY,
-                            Monitor.bridge_map.get(task.payload.get('device_url'))
-                        ),
-                        command,
-                        headers={'Content-Type': 'application/json'}
-                    )
-                else:
-                    http_resp = http.put(
-                        'http://{}:{}/{}/{}/lights/{}/state'.format(
-                            BRIDGE_HOST,
-                            BRIDGE_PORT,
-                            BRIDGE_API_PATH,
-                            BRIDGE_API_KEY,
-                            Monitor.bridge_map.get(task.payload.get('device_url'))
-                        ),
-                        command,
-                        headers={'Content-Type': 'application/json'}
-                    )
+                command = json.loads(command)
+                command['xy'] = Monitor.bridge_map.get(task.payload.get('device_url'))[1].rgb_to_xy(command.get('r'), command.get('g'), command.get('b'))
+                del command['r']
+                del command['g']
+                del command['b']
+                command = json.dumps(command)
+                http_resp = http.put(
+                    'http://{}:{}/{}/{}/lights/{}/state'.format(
+                        BRIDGE_HOST,
+                        BRIDGE_PORT,
+                        BRIDGE_API_PATH,
+                        BRIDGE_API_KEY,
+                        Monitor.bridge_map.get(task.payload.get('device_url'))[0]
+                    ),
+                    command,
+                    headers={'Content-Type': 'application/json'}
+                )
                 if not http_resp.status == 200:
                     logger.error("could not route message to hue bridge - '{}'".format(http_resp.status))
                 response = str(http_resp.status)
