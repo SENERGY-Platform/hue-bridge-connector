@@ -2,11 +2,11 @@ if __name__ == '__main__':
     exit('Please use "client.py"')
 
 try:
-    from modules.http_lib import Methods as http
-    from connector.client import Client
-    from connector.device import Device
+    from connector_client.modules.http_lib import Methods as http
+    from connector_client.client import Client
+    from connector_client.device import Device
     from hue_bridge.configuration import BRIDGE_API_KEY, BRIDGE_API_PATH, BRIDGE_HOST, BRIDGE_PORT
-    from modules.device_pool import DevicePool
+    from connector_client.modules.device_pool import DevicePool
     from hue_bridge.logger import root_logger
     from rgbxy import Converter, get_light_gamut
 except ImportError as ex:
