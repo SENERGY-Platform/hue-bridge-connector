@@ -37,14 +37,8 @@ BRIDGE_API_PATH = config['BRIDGE']['api_path']
 BRIDGE_API_KEY = config['BRIDGE']['api_key']
 SEPL_DEVICE_TYPE = config['SEPL']['device_type']
 
-if not BRIDGE_HOST or not BRIDGE_PORT:
-    exit('Please provide Hue Bridge host and port')
-
-if not BRIDGE_API_PATH:
-    exit('Please provide Hue Bridge API path')
-
-if not BRIDGE_API_KEY:
-    exit('Please provide Hue Bridge API key')
+if not all((BRIDGE_HOST, BRIDGE_PORT, BRIDGE_API_PATH, BRIDGE_API_KEY)):
+    exit('Please provide Hue Bridge information')
 
 if not SEPL_DEVICE_TYPE:
     exit('Please provide a SEPL device type')
