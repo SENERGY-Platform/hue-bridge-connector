@@ -1,9 +1,9 @@
 if __name__ == '__main__':
     exit('Please use "client.py"')
 
-import os, configparser
+import os, inspect, configparser
 
-conf_path = '{}/hue_bridge'.format(os.getcwd())
+conf_path = os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])
 conf_file = 'bridge.conf'
 
 config = configparser.ConfigParser()
