@@ -5,7 +5,7 @@ try:
     from connector_client.modules.http_lib import Methods as http
     from connector_client.client import Client
     from connector_client.device import Device
-    from hue_bridge.configuration import BRIDGE_API_KEY, BRIDGE_API_PATH, BRIDGE_HOST, BRIDGE_PORT
+    from hue_bridge.configuration import BRIDGE_API_KEY, BRIDGE_API_PATH, BRIDGE_HOST, BRIDGE_PORT, SEPL_DEVICE_TYPE
     from connector_client.modules.device_pool import DevicePool
     from hue_bridge.logger import root_logger
     from rgbxy import Converter, get_light_gamut
@@ -84,7 +84,7 @@ class Monitor(Thread):
                 name = unknown_devices[new_device_id].get('name')
                 logger.info("found '{}' with id '{}'".format(name, new_device_id))
                 __class__.bridge_map[new_device_id] = (unknown_devices[new_device_id].get('LIGHT_KEY'), Converter(get_light_gamut(unknown_devices[new_device_id].get('modelid'))))
-                device = Device(new_device_id, 'iot#58b47359-a3fe-4e5a-84a2-08bf7b83395d', name)
+                device = Device(new_device_id, SEPL_DEVICE_TYPE, name)
                 device.addTag('type', unknown_devices[new_device_id].get('type'))
                 device.addTag('manufacturer', unknown_devices[new_device_id].get('manufacturername'))
                 if init:
