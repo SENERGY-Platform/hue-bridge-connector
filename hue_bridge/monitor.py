@@ -41,8 +41,7 @@ class Monitor(Thread):
     def __init__(self):
         super().__init__()
         unknown_devices= self._queryBridge()
-        if unknown_devices:
-            self._evaluate(unknown_devices, True)
+        self._evaluate(unknown_devices, True)
         self.start()
 
 
@@ -50,8 +49,7 @@ class Monitor(Thread):
         while True:
             time.sleep(30)
             unknown_devices = self._queryBridge()
-            if unknown_devices:
-                self._evaluate(unknown_devices, False)
+            self._evaluate(unknown_devices, False)
 
 
     def _queryBridge(self):
