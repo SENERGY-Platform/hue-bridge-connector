@@ -25,7 +25,9 @@ from subprocess import call, check_output, DEVNULL
 from socket import gethostbyname, getfqdn
 from threading import Thread
 from platform import system
-import time, json
+from urllib.parse import urlparse
+import time, json, io, socket
+import http.client as HTTPclient
 
 logger = root_logger.getChild(__name__)
 
@@ -86,7 +88,7 @@ def discoverHosts() -> list:
             worker.join()
     return alive_hosts
 
-def getNUPnP() -> str:
+def discoverNUPnP() -> str:
     response = http.get('https://{}/{}/nupnp'.format(config.Cloud.host, config.Cloud.api_path), verify=False, retries=3, retry_delay=1)
     if response.status == 200:
         host_list = json.loads(response.body)
@@ -96,6 +98,37 @@ def getNUPnP() -> str:
                     return host.get('internalipaddress')
             except AttributeError:
                 logger.error("could not extract host ip from '{}'".format(host))
+    return str()
+
+class DummySocket(io.BytesIO):
+    # add 'makefile' and return self to satisfy http.client.HTTPResponse
+    def makefile(self, *args, **kwargs):
+        return self
+
+def discoverSSDP() -> str:
+    broadcast_msg = \
+        'M-SEARCH * HTTP/1.1\r\n' \
+        'HOST: 239.255.255.250:1900\r\n' \
+        'MAN: "ssdp:discover"\r\n' \
+        'MX: 10\r\n' \
+        'ST: IpBridge\r\n' \
+        '\r\n'
+    try:
+        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        udp_socket.settimeout(10)
+        udp_socket.sendto(broadcast_msg.encode(), ('239.255.255.250', 1900))
+        while True:
+            try:
+                response = udp_socket.recv(1024)
+                r = HTTPclient.HTTPResponse(DummySocket(response))
+                r.begin()
+                if r.getheader('hue-bridgeid') in config.Bridge.id and r.getheader('LOCATION'):
+                    udp_socket.close()
+                    return urlparse(r.getheader('LOCATION')).hostname
+            except socket.timeout:
+                break
+    except Exception as ex:
+        logger.error(ex)
     return str()
 
 def validateHostsWorker(hosts, valid_hosts):
@@ -143,12 +176,17 @@ def discoverBridge():
             return
     host = None
     while not host:
-        host = getNUPnP()
+        host = discoverNUPnP()
         if not host:
-            logger.warning("could not retrieve host from cloud - reverting to ip range scan")
-            valid_hosts = validateHosts(discoverHosts())
-            if valid_hosts:
-                host = valid_hosts[config.Bridge.id]
+            logger.warning("could not retrieve host from cloud - reverting to SSDP")
+            host = discoverSSDP()
+            if not host:
+                logger.warning("could not discover host via SSDP - reverting to ip range scan")
+                valid_hosts = validateHosts(discoverHosts())
+                if valid_hosts:
+                    host = valid_hosts[config.Bridge.id]
+                    continue
+            else:
                 continue
         else:
             continue
