@@ -131,6 +131,17 @@ def discoverSSDP() -> str:
         logger.error(ex)
     return str()
 
+def validateHost(host) -> bool:
+    response = http.get('http://{}:{}/{}/na/config'.format(host, config.Bridge.port, config.Bridge.api_path), verify=False)
+    if response.status == 200:
+        try:
+            host_info = json.loads(response.body)
+            if host_info.get('bridgeid') in config.Bridge.id:
+                return True
+        except Exception:
+            pass
+    return False
+
 def validateHostsWorker(hosts, valid_hosts):
     for host in hosts:
         if validateHost(host):
@@ -158,17 +169,6 @@ def validateHosts(hosts) -> dict:
     for worker in workers:
         worker.join()
     return valid_hosts
-
-def validateHost(host) -> bool:
-    response = http.get('http://{}:{}/{}/na/config'.format(host, config.Bridge.port, config.Bridge.api_path), verify=False)
-    if response.status == 200:
-        try:
-            host_info = json.loads(response.body)
-            if host_info.get('bridgeid') in config.Bridge.id:
-                return True
-        except Exception:
-            pass
-    return False
 
 def discoverBridge():
     if config.Bridge.host:
