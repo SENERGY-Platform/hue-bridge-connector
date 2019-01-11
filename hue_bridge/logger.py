@@ -21,6 +21,6 @@ except ImportError as ex:
 import logging
 
 
-root_logger = logging.getLogger("hue-bridge-gateway")
+root_logger = logging.getLogger("hue-bridge-connector")
 root_logger.setLevel(logging.INFO)
 root_logger.addHandler(connector_lib_log_handler)
