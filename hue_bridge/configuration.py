@@ -17,44 +17,44 @@
 if __name__ == '__main__':
     exit('Please use "client.py"')
 
-import os, inspect, configparser
-
-conf_path = os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])
-conf_file = 'bridge.conf'
-
-config = configparser.ConfigParser()
-
-
-if not os.path.isfile(os.path.join(conf_path, conf_file)):
-    print('No config file found')
-    config['BRIDGE'] = {
-        'host': '',
-        'port': '80',
-        'api_path': 'api',
-        'api_key': ''
-    }
-    config['SEPL'] = {
-        'device_type': ''
-    }
-    with open(os.path.join(conf_path, conf_file), 'w') as cf:
-        config.write(cf)
-    exit("Created blank config file at '{}'".format(conf_path))
-
-
 try:
-    config.read(os.path.join(conf_path, conf_file))
-except Exception as ex:
-    exit(ex)
+    from simple_conf import configuration, section
+    from connector_lib.modules.logger import connector_lib_log_handler
+except ImportError as ex:
+    exit("{} - {}".format(__name__, ex.msg))
+import logging, os, inspect
 
 
-BRIDGE_HOST = config['BRIDGE']['host']
-BRIDGE_PORT = config['BRIDGE']['port']
-BRIDGE_API_PATH = config['BRIDGE']['api_path']
-BRIDGE_API_KEY = config['BRIDGE']['api_key']
-SEPL_DEVICE_TYPE = config['SEPL']['device_type']
+logger = logging.getLogger('simple-conf')
+logger.addHandler(connector_lib_log_handler)
 
-if not all((BRIDGE_HOST, BRIDGE_PORT, BRIDGE_API_PATH, BRIDGE_API_KEY)):
+
+@configuration
+class HueConf:
+
+    @section
+    class Bridge:
+        host = None
+        port = 80
+        api_path = 'api'
+        api_key = None
+        id = None
+
+    @section
+    class Cloud:
+        host = 'www.meethue.com'
+        api_path = 'api'
+
+    @section
+    class Senergy:
+        device_type = None
+
+
+config = HueConf('bridge.conf', os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
+
+
+if not all((config.Bridge.id, config.Bridge.port, config.Bridge.api_path, config.Bridge.api_key, config.Cloud.host, config.Cloud.api_path)):
     exit('Please provide Hue Bridge information')
 
-if not SEPL_DEVICE_TYPE:
-    exit('Please provide a SEPL device type')
+if not config.Senergy.device_type:
+    exit('Please provide a Senergy device type')
