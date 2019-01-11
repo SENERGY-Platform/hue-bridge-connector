@@ -21,7 +21,7 @@ try:
     from connector_lib.modules.http_lib import Methods as http
     from connector_lib.client import Client
     from connector_lib.device import Device
-    from hue_bridge.configuration import BRIDGE_API_KEY, BRIDGE_API_PATH, BRIDGE_HOST, BRIDGE_PORT, SEPL_DEVICE_TYPE
+    from hue_bridge.configuration import config
     from connector_lib.modules.device_pool import DevicePool
     from hue_bridge.logger import root_logger
     from rgbxy import Converter, get_light_gamut
@@ -56,10 +56,10 @@ class Monitor(Thread):
         unknown_lights = dict()
         response = http.get(
             'http://{}:{}/{}/{}/lights'.format(
-                BRIDGE_HOST,
-                BRIDGE_PORT,
-                BRIDGE_API_PATH,
-                BRIDGE_API_KEY
+                config.Bridge.host,
+                config.Bridge.port,
+                config.Bridge.api_path,
+                config.Bridge.api_key
             )
         )
         if response.status == 200:
@@ -98,7 +98,7 @@ class Monitor(Thread):
                 name = unknown_devices[new_device_id].get('name')
                 logger.info("found '{}' with id '{}'".format(name, new_device_id))
                 __class__.bridge_map[new_device_id] = (unknown_devices[new_device_id].get('LIGHT_KEY'), Converter(get_light_gamut(unknown_devices[new_device_id].get('modelid'))))
-                device = Device(new_device_id, SEPL_DEVICE_TYPE, name)
+                device = Device(new_device_id, config.Senergy.device_type, name)
                 device.addTag('type', unknown_devices[new_device_id].get('type'))
                 device.addTag('manufacturer', unknown_devices[new_device_id].get('manufacturername'))
                 if init:
