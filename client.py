@@ -18,9 +18,10 @@ try:
     from connector_lib.modules.http_lib import Methods as http
     from connector_lib.modules.device_pool import DevicePool
     from connector_lib.client import Client
-    from hue_bridge.configuration import BRIDGE_API_KEY, BRIDGE_API_PATH, BRIDGE_HOST, BRIDGE_PORT
+    from hue_bridge.configuration import config
     from hue_bridge.monitor import Monitor
     from hue_bridge.logger import root_logger
+    from hue_bridge.discovery import discoverBridge
 except ImportError as ex:
     exit("{} - {}".format(__name__, ex.msg))
 from time import sleep
@@ -46,10 +47,10 @@ def bridgeController():
                 command = json.dumps(command)
                 http_resp = http.put(
                     'http://{}:{}/{}/{}/lights/{}/state'.format(
-                        BRIDGE_HOST,
-                        BRIDGE_PORT,
-                        BRIDGE_API_PATH,
-                        BRIDGE_API_KEY,
+                        config.Bridge.host,
+                        config.Bridge.port,
+                        config.Bridge.api_path,
+                        config.Bridge.api_key,
                         Monitor.bridge_map.get(task.payload.get('device_url'))[0]
                     ),
                     command,
@@ -68,6 +69,7 @@ def bridgeController():
 
 
 if __name__ == '__main__':
+    discoverBridge()
     bridge_monitor = Monitor()
     client_connector = Client(device_manager=DevicePool)
     bridgeController()
