@@ -177,6 +177,9 @@ def discoverBridge():
     host = None
     while not host:
         host = discoverNUPnP()
+        if host:
+            if not validateHost(host):
+                host = None
         if not host:
             logger.warning("could not retrieve host from cloud - reverting to SSDP")
             host = discoverSSDP()
@@ -186,6 +189,8 @@ def discoverBridge():
                 if valid_hosts:
                     host = valid_hosts[config.Bridge.id]
                     continue
+                else:
+                    logger.warning("ip range scan yielded no results")
             else:
                 continue
         else:
