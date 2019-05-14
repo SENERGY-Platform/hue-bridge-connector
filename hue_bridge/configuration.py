@@ -57,4 +57,4 @@ if not all((config.Bridge.id, config.Bridge.port, config.Bridge.api_path, config
     exit('Please provide Hue Bridge information')
 
 if not config.Senergy.device_type:
-    exit('Please provide a Senergy device type')
+    exit('Please provide a SENERGY device type')
