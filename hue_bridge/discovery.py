@@ -85,9 +85,9 @@ def discoverHosts() -> list:
     return alive_hosts
 
 def discoverNUPnP() -> str:
-    response = http.get('https://{}/{}/nupnp'.format(config.Cloud.host, config.Cloud.api_path), verify=False, retries=3, retry_delay=1)
-    if response.status == 200:
-        host_list = json.loads(response.body)
+    response = requests.get('https://{}/{}/nupnp'.format(config.Cloud.host, config.Cloud.api_path), verify=False, retries=3, retry_delay=1)
+    if response.status_code == 200:
+        host_list = response.json()
         for host in host_list:
             try:
                 if host.get('id').upper() in config.Bridge.id:
@@ -128,10 +128,10 @@ def discoverSSDP() -> str:
     return str()
 
 def validateHost(host) -> bool:
-    response = http.get('http://{}:{}/{}/na/config'.format(host, config.Bridge.port, config.Bridge.api_path), verify=False)
-    if response.status == 200:
+    response = requests.get('http://{}:{}/{}/na/config'.format(host, config.Bridge.port, config.Bridge.api_path), verify=False)
+    if response.status_code == 200:
         try:
-            host_info = json.loads(response.body)
+            host_info = response.json()
             if host_info.get('bridgeid') in config.Bridge.id:
                 return True
         except Exception:
