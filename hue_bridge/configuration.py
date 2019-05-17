@@ -18,11 +18,12 @@ if __name__ == '__main__':
     exit('Please use "client.py"')
 
 
+from simple_conf import configuration, section
+import os, inspect, logging
+
 
 logger = logging.getLogger('simple-conf')
-logger.addHandler(connector_lib_log_handler)
-from simple_conf import configuration, section
-import os, inspect
+logger.addHandler(logging.StreamHandler())
 
 
 @configuration
