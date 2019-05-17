@@ -15,6 +15,10 @@
 """
 
 
+if __name__ == '__main__':
+    exit('Please use "client.py"')
+
+
 from hue_bridge.logger import root_logger
 from hue_bridge.configuration import config
 from subprocess import call, check_output, DEVNULL

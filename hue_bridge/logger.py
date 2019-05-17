@@ -14,6 +14,11 @@
    limitations under the License.
 """
 
+
+if __name__ == '__main__':
+    exit('Please use "client.py"')
+
+
 from .configuration import config
 import logging, cc_lib
 
