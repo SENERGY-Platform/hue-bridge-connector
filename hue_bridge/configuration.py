@@ -33,14 +33,14 @@ class HueConf:
     class Bridge:
         host = None
         port = 80
-        api_path = 'api'
+        api_path = "api"
         api_key = None
         id = None
 
     @section
     class Cloud:
-        host = 'www.meethue.com'
-        api_path = 'api'
+        host = "www.meethue.com"
+        api_path = "api"
 
     @section
     class Senergy:
