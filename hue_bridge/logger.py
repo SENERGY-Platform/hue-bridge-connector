@@ -14,11 +14,8 @@
    limitations under the License.
 """
 
-try:
-    from connector_lib.modules.logger import connector_lib_log_handler
-except ImportError as ex:
-    exit("{} - {}".format(__name__, ex.msg))
-import logging
+from .configuration import config
+import logging, cc_lib
 
 
 root_logger = logging.getLogger("hue-bridge-connector")
