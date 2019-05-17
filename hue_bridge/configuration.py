@@ -17,16 +17,12 @@
 if __name__ == '__main__':
     exit('Please use "client.py"')
 
-try:
-    from simple_conf import configuration, section
-    from connector_lib.modules.logger import connector_lib_log_handler
-except ImportError as ex:
-    exit("{} - {}".format(__name__, ex.msg))
-import logging, os, inspect
 
 
 logger = logging.getLogger('simple-conf')
 logger.addHandler(connector_lib_log_handler)
+from simple_conf import configuration, section
+import os, inspect
 
 
 @configuration
