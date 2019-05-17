@@ -14,13 +14,6 @@
    limitations under the License.
 """
 
-try:
-    from connector_lib.modules.http_lib import Methods as http
-    from connector_lib.modules.device_pool import DevicePool
-    from hue_bridge.logger import root_logger
-    from hue_bridge.configuration import config
-except ImportError as ex:
-    exit("{} - {}".format(__name__, ex.msg))
 from subprocess import call, check_output, DEVNULL
 from socket import gethostbyname, getfqdn
 from threading import Thread
