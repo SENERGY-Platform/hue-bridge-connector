@@ -14,12 +14,15 @@
    limitations under the License.
 """
 
+
+from hue_bridge.logger import root_logger
+from hue_bridge.configuration import config
 from subprocess import call, check_output, DEVNULL
 from socket import gethostbyname, getfqdn
 from threading import Thread
 from platform import system
 from urllib.parse import urlparse
-import time, json, io, socket
+import time, io, socket, requests
 import http.client as HTTPclient
 
 logger = root_logger.getChild(__name__)
