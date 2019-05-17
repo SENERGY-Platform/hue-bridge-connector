@@ -18,6 +18,14 @@ from .configuration import config
 import logging, cc_lib
 
 
-root_logger = logging.getLogger("hue-bridge-connector")
-root_logger.setLevel(logging.INFO)
-root_logger.addHandler(connector_lib_log_handler)
+logging_levels = {
+    'info': logging.INFO,
+    'warning': logging.WARNING,
+    'error': logging.ERROR,
+    'critical': logging.CRITICAL,
+    'debug': logging.DEBUG
+}
+
+
+root_logger = cc_lib.logger.getLogger("hue-bridge")
+root_logger.setLevel(logging_levels.setdefault(config.Logger.level, logging.INFO))
