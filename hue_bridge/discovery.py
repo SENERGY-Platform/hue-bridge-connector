@@ -141,21 +141,32 @@ def discoverSSDP() -> str:
     except Exception as ex:
         logger.warning("SSDP discovery failed - {}".format(ex))
 
+
+def probeHost(host) -> bool:
+    try:
+        response = requests.head("http://{}/{}/na/config".format(host, config.Bridge.api_path))
+        if response.status_code == 200:
+                return True
+    except Exception:
+        pass
+    return False
+
+
 def validateHost(host) -> bool:
-    response = requests.get('http://{}:{}/{}/na/config'.format(host, config.Bridge.port, config.Bridge.api_path), verify=False)
-    if response.status_code == 200:
-        try:
+    try:
+        response = requests.get("https://{}/{}/na/config".format(host, config.Bridge.api_path), verify=False)
+        if response.status_code == 200:
             host_info = response.json()
             if host_info.get('bridgeid') in config.Bridge.id:
                 return True
-        except Exception:
-            pass
+    except Exception:
+        pass
     return False
 
 
 def validateHostsWorker(hosts, valid_hosts):
     for host in hosts:
-        if validateHost(host):
+        if probeHost(host) and validateHost(host):
             valid_hosts[config.Bridge.id] = host
 
 
