@@ -201,9 +201,8 @@ def discoverBridge():
     host = None
     while not host:
         host = discoverNUPnP()
-        if host:
-            if not validateHost(host):
-                host = None
+        if host and not validateHost(host):
+            host = None
         if not host:
             logger.warning("could not retrieve host from cloud - reverting to SSDP")
             host = discoverSSDP()
