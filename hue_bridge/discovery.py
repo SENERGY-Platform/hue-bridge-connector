@@ -139,8 +139,7 @@ def discoverSSDP() -> str:
         except socket.timeout:
             pass
     except Exception as ex:
-        logger.error(ex)
-    return str()
+        logger.warning("SSDP discovery failed - {}".format(ex))
 
 def validateHost(host) -> bool:
     response = requests.get('http://{}:{}/{}/na/config'.format(host, config.Bridge.port, config.Bridge.api_path), verify=False)
