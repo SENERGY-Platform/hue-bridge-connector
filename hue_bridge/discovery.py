@@ -122,7 +122,6 @@ def discoverSSDP() -> str:
                 response = udp_socket.recv(65507)
                 response = HTTPclient.HTTPResponse(DummySocket(response))
                 response.begin()
-                print(response.headers)
                 if response.getheader('hue-bridgeid') and response.getheader('hue-bridgeid') in config.Bridge.id and response.getheader('LOCATION'):
                     udp_socket.close()
                     return urlparse(response.getheader('LOCATION')).hostname
