@@ -26,11 +26,14 @@ from socket import gethostbyname, getfqdn
 from threading import Thread
 from platform import system
 from urllib.parse import urlparse
+from urllib3 import disable_warnings as urllib3DisableWarnings
+from urllib3.exceptions import InsecureRequestWarning as urllib3InsecureRequestWarning
 import time, io, socket, requests
 import http.client as HTTPclient
 
 logger = root_logger.getChild(__name__.split(".", 1)[-1])
 
+urllib3DisableWarnings(urllib3InsecureRequestWarning)
 
 def ping(host) -> bool:
     return call(['ping', '-c', '2', '-t', '2', host], stdout=DEVNULL, stderr=DEVNULL) == 0
