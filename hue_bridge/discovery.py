@@ -38,6 +38,7 @@ urllib3DisableWarnings(urllib3InsecureRequestWarning)
 def ping(host) -> bool:
     return call(['ping', '-c', '2', '-t', '2', host], stdout=DEVNULL, stderr=DEVNULL) == 0
 
+
 def getLocalIP() -> str:
     sys_type = system().lower()
     try:
@@ -57,6 +58,7 @@ def getLocalIP() -> str:
         exit("could not get local ip - {}".format(ex))
     return str()
 
+
 def getIpRange(local_ip) -> list:
     split_ip = local_ip.rsplit('.', 1)
     base_ip = split_ip[0] + '.'
@@ -66,10 +68,12 @@ def getIpRange(local_ip) -> list:
         return ip_range
     return list()
 
+
 def discoverHostsWorker(ip_range, alive_hosts):
     for ip in ip_range:
         if ping(ip):
             alive_hosts.append(ip)
+
 
 def discoverHosts() -> list:
     ip_range = getIpRange(getLocalIP())
@@ -91,6 +95,7 @@ def discoverHosts() -> list:
             worker.join()
     return alive_hosts
 
+
 def discoverNUPnP() -> str:
     response = requests.get('https://{}/{}/nupnp'.format(config.Cloud.host, config.Cloud.api_path), verify=False, retries=3, retry_delay=1)
     if response.status_code == 200:
@@ -107,6 +112,7 @@ class DummySocket(io.BytesIO):
     # add 'makefile' and return self to satisfy http.client.HTTPResponse
     def makefile(self, *args, **kwargs):
         return self
+
 
 def discoverSSDP() -> str:
     broadcast_msg = \
@@ -145,10 +151,12 @@ def validateHost(host) -> bool:
             pass
     return False
 
+
 def validateHostsWorker(hosts, valid_hosts):
     for host in hosts:
         if validateHost(host):
             valid_hosts[config.Bridge.id] = host
+
 
 def validateHosts(hosts) -> dict:
     valid_hosts = dict()
@@ -172,6 +180,7 @@ def validateHosts(hosts) -> dict:
     for worker in workers:
         worker.join()
     return valid_hosts
+
 
 def discoverBridge():
     if config.Bridge.host:
