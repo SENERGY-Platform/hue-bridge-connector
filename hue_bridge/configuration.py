@@ -32,7 +32,6 @@ class HueConf:
     @section
     class Bridge:
         host = None
-        port = 80
         api_path = "api"
         api_key = None
         id = None
