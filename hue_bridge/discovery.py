@@ -109,9 +109,9 @@ def discoverSSDP() -> str:
     broadcast_msg = \
         'M-SEARCH * HTTP/1.1\r\n' \
         'HOST: 239.255.255.250:1900\r\n' \
-        'MAN: "ssdp:discover"\r\n' \
+        'ST: ssdp:all\r\n' \
         'MX: 10\r\n' \
-        'ST: IpBridge\r\n' \
+        'MAN: "ssdp:discover"\r\n' \
         '\r\n'
     try:
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
