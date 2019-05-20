@@ -97,16 +97,18 @@ def discoverHosts() -> list:
 
 
 def discoverNUPnP() -> str:
-    response = requests.get('https://{}/{}/nupnp'.format(config.Cloud.host, config.Cloud.api_path), verify=False, retries=3, retry_delay=1)
-    if response.status_code == 200:
-        host_list = response.json()
-        for host in host_list:
-            try:
-                if host.get('id').upper() in config.Bridge.id:
-                    return host.get('internalipaddress')
-            except AttributeError:
-                logger.error("could not extract host ip from '{}'".format(host))
-    return str()
+    try:
+        response = requests.get('https://{}/{}/nupnp'.format(config.Cloud.host, config.Cloud.api_path))
+        if response.status_code == 200:
+            host_list = response.json()
+            for host in host_list:
+                try:
+                    if host.get('id').upper() in config.Bridge.id:
+                        return host.get('internalipaddress')
+                except AttributeError:
+                    logger.error("could not extract host ip from '{}'".format(host))
+    except requests.exceptions.RequestException as ex:
+        logger.warning("NUPnP discovery failed - {}".format(ex))
 
 class DummySocket(io.BytesIO):
     # add 'makefile' and return self to satisfy http.client.HTTPResponse
