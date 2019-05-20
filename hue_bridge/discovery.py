@@ -115,7 +115,7 @@ def discoverSSDP() -> str:
         '\r\n'
     try:
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        udp_socket.settimeout(10)
+        udp_socket.settimeout(20)
         udp_socket.sendto(broadcast_msg.encode(), ('239.255.255.250', 1900))
         while True:
             try:
