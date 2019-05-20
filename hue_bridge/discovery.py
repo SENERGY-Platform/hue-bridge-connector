@@ -29,7 +29,7 @@ from urllib.parse import urlparse
 import time, io, socket, requests
 import http.client as HTTPclient
 
-logger = root_logger.getChild(__name__)
+logger = root_logger.getChild(__name__.split(".", 1)[-1])
 
 
 def ping(host) -> bool:
