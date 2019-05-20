@@ -117,16 +117,17 @@ def discoverSSDP() -> str:
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         udp_socket.settimeout(20)
         udp_socket.sendto(broadcast_msg.encode(), ('239.255.255.250', 1900))
-        while True:
-            try:
-                response = udp_socket.recv(1024)
-                r = HTTPclient.HTTPResponse(DummySocket(response))
-                r.begin()
-                if r.getheader('hue-bridgeid') in config.Bridge.id and r.getheader('LOCATION'):
+        try:
+            while True:
+                response = udp_socket.recv(65507)
+                response = HTTPclient.HTTPResponse(DummySocket(response))
+                response.begin()
+                print(response.headers)
+                if response.getheader('hue-bridgeid') and response.getheader('hue-bridgeid') in config.Bridge.id and response.getheader('LOCATION'):
                     udp_socket.close()
-                    return urlparse(r.getheader('LOCATION')).hostname
-            except socket.timeout:
-                break
+                    return urlparse(response.getheader('LOCATION')).hostname
+        except socket.timeout:
+            pass
     except Exception as ex:
         logger.error(ex)
     return str()
