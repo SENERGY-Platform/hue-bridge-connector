@@ -49,7 +49,7 @@ class HueConf:
 config = HueConf('bridge.conf', os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
 
 
-if not all((config.Bridge.id, config.Bridge.port, config.Bridge.api_path, config.Bridge.api_key, config.Cloud.host, config.Cloud.api_path)):
+if not all((config.Bridge.id, config.Bridge.api_path, config.Bridge.api_key, config.Cloud.host, config.Cloud.api_path)):
     exit('Please provide Hue Bridge information')
 
 if not config.Senergy.device_type:
