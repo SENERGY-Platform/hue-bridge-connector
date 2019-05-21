@@ -14,24 +14,21 @@
    limitations under the License.
 """
 
+
 if __name__ == '__main__':
     exit('Please use "client.py"')
 
-try:
-    from connector_lib.modules.http_lib import Methods as http
-    from connector_lib.client import Client
-    from connector_lib.device import Device
-    from hue_bridge.configuration import config
-    from connector_lib.modules.device_pool import DevicePool
-    from hue_bridge.logger import root_logger
-    from rgbxy import Converter, get_light_gamut
-except ImportError as ex:
-    exit("{} - {}".format(__name__, ex.msg))
-import json, time
+
+from .configuration import config
+from .logger import root_logger
+from .device_manager import DeviceManager
+from .device import Device
+from rgbxy import Converter, get_light_gamut
 from threading import Thread
+import time, requests, cc_lib
 
 
-logger = root_logger.getChild(__name__)
+logger = root_logger.getChild(__name__.split(".", 1)[-1])
 
 
 class Monitor(Thread):
