@@ -41,3 +41,13 @@ class Device(cc_lib.device.Device):
     def state(self, arg):
         with self.__state_lock:
             self.__state = arg
+
+    def __iter__(self):
+        items = (
+            ("name", self.name),
+            ("model", self.model),
+            ("state", self.state),
+            ("number", self.number)
+        )
+        for item in items:
+            yield item
