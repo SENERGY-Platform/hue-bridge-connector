@@ -19,11 +19,7 @@ if __name__ == '__main__':
 
 
 from simple_conf import configuration, section
-import os, inspect, logging
-
-
-logger = logging.getLogger('simple-conf')
-logger.addHandler(logging.StreamHandler())
+import os, inspect
 
 
 @configuration
