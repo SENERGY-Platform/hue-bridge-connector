@@ -23,7 +23,6 @@ from .configuration import config
 from .logger import root_logger
 from .device_manager import DeviceManager
 from .device import Device
-from rgbxy import Converter, get_light_gamut
 from threading import Thread
 import time, requests, cc_lib
 
