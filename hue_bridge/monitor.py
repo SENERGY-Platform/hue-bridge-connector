@@ -32,85 +32,124 @@ logger = root_logger.getChild(__name__.split(".", 1)[-1])
 
 
 class Monitor(Thread):
-    bridge_map = dict()
-    _known_devices = dict()
-
-    def __init__(self):
+    def __init__(self, device_manager: DeviceManager, client: cc_lib.client.Client):
         super().__init__()
-        unknown_devices= self._queryBridge()
-        self._evaluate(unknown_devices, True)
-        self.start()
-
+        self.daemon = True
+        self.__device_manager = device_manager
+        self.__client = client
+        #self.__known_devices = dict()
 
     def run(self):
         while True:
-            time.sleep(30)
-            unknown_devices = self._queryBridge()
-            self._evaluate(unknown_devices, False)
+            queried_devices = self.__queryBridge()
+            if queried_devices:
+                self.__evaluate(queried_devices)
+            time.sleep(15)
 
-
-    def _queryBridge(self):
-        unknown_lights = dict()
-        response = http.get(
-            'http://{}:{}/{}/{}/lights'.format(
-                config.Bridge.host,
-                config.Bridge.port,
-                config.Bridge.api_path,
-                config.Bridge.api_key
+    def __queryBridge(self):
+        try:
+            response = requests.get(
+                "https://{}/{}/{}/lights".format(config.Bridge.host, config.Bridge.api_path, config.Bridge.api_key),
+                verify=False
             )
-        )
-        if response.status == 200:
-            lights = json.loads(response.body)
-            for light_key in lights:
-                light = lights.get(light_key)
-                light['LIGHT_KEY'] = light_key
-                light_id = light.get('uniqueid')
-                unknown_lights[light_id] = light
-        else:
-            logger.error("could not query lights - '{}'".format(response.status))
-        return unknown_lights
+            if response.status_code == 200:
+                response = response.json()
+                devices = dict()
+                for number, device in response.items():
+                    try:
+                        devices[device["uniqueid"]] = (
+                            {
+                                "name": device["name"],
+                                "model": device["modelid"],
+                                "state": device["state"],
+                                "number": number
+                            },
+                            {
+                                "product_name": device["productname"],
+                                "manufacturer": device["manufacturername"],
+                                "product_type": device["type"]
+                            }
+                        )
+                    except KeyError as ex:
+                        logger.error("could not parse device - {}".format(ex))
+                        logger.debug(device)
+                return devices
+            else:
+                logger.error("could not query bridge - '{}'".format(response.status_code))
+        except requests.exceptions.RequestException as ex:
+            logger.error("could not query bridge - '{}'".format(ex))
 
-
-    def _diff(self, known, unknown):
+    def __diff(self, known: dict, unknown: dict):
         known_set = set(known)
         unknown_set = set(unknown)
         missing = known_set - unknown_set
         new = unknown_set - known_set
-        changed = {k for k in known_set & unknown_set if known[k] != unknown[k]}
+        changed = {key for key in known_set & unknown_set if dict(known[key]) != unknown[key][0]}
         return missing, new, changed
 
-
-    def _evaluate(self, unknown_devices, init):
-        missing_devices, new_devices, changed_devices = self._diff(__class__._known_devices, unknown_devices)
+    def __evaluate(self, queried_devices):
+        missing_devices, new_devices, changed_devices = self.__diff(self.__device_manager.devices, queried_devices)
+        updated_devices = list()
         if missing_devices:
-            for missing_device_id in missing_devices:
-                logger.info("can't find '{}' with id '{}'".format(__class__._known_devices[missing_device_id].get('name'), missing_device_id))
-                del __class__.bridge_map[missing_device_id]
-                if init:
-                    DevicePool.remove(missing_device_id)
-                else:
-                    Client.disconnect(missing_device_id)
+            futures = list()
+            for device_id in missing_devices:
+                logger.info("can't find '{}' with id '{}'".format(
+                    self.__device_manager.get(device_id).name, device_id)
+                )
+                futures.append((device_id, self.__client.deleteDevice(device_id, asynchronous=True)))
+            for device_id, future in futures:
+                future.wait()
+                try:
+                    future.result()
+                    self.__device_manager.delete(device_id)
+                except cc_lib.client.DeviceDeleteError:
+                    try:
+                        self.__client.disconnectDevice(device_id)
+                    except (cc_lib.client.DeviceDisconnectError, cc_lib.client.NotConnectedError):
+                        pass
         if new_devices:
-            for new_device_id in new_devices:
-                name = unknown_devices[new_device_id].get('name')
-                logger.info("found '{}' with id '{}'".format(name, new_device_id))
-                __class__.bridge_map[new_device_id] = (unknown_devices[new_device_id].get('LIGHT_KEY'), Converter(get_light_gamut(unknown_devices[new_device_id].get('modelid'))))
-                device = Device(new_device_id, config.Senergy.device_type, name)
-                device.addTag('type', unknown_devices[new_device_id].get('type'))
-                device.addTag('manufacturer', unknown_devices[new_device_id].get('manufacturername'))
-                if init:
-                    DevicePool.add(device)
-                else:
-                    Client.add(device)
+            futures = list()
+            for device_id in new_devices:
+                device = Device(device_id, **queried_devices[device_id][0])
+                for key, value in queried_devices[device_id][1].items():
+                    device.addTag(key, value)
+                logger.info("found '{}' with id '{}'".format(device.name, device.id))
+                futures.append((device, self.__client.addDevice(device, asynchronous=True)))
+            for device, future in futures:
+                future.wait()
+                try:
+                    future.result()
+                    self.__device_manager.add(device)
+                    if device.state["reachable"]:
+                        self.__client.connectDevice(device, asynchronous=True)
+                except (cc_lib.client.DeviceAddError, cc_lib.client.DeviceUpdateError):
+                    pass
         if changed_devices:
-            for changed_device_id in changed_devices:
-                device = DevicePool.get(changed_device_id)
-                name = unknown_devices[changed_device_id].get('name')
-                if not name == device.name:
-                    device.name = name
-                    if init:
-                        DevicePool.update(device)
+            futures = list()
+            for device_id in changed_devices:
+                device = self.__device_manager.get(device_id)
+                prev_device_name = device.name
+                prev_device_reachable_state = device.state["reachable"]
+                device.name = queried_devices[device_id][0]["name"]
+                device.model = queried_devices[device_id][0]["model"]
+                device.state = queried_devices[device_id][0]["state"]
+                device.number = queried_devices[device_id][0]["number"]
+                if device.state["reachable"] != prev_device_reachable_state:
+                    if device.state["reachable"]:
+                        self.__client.connectDevice(device, asynchronous=True)
                     else:
-                        Client.update(device)
-                    logger.info("name of '{}' changed to {}".format(changed_device_id, name))
-        __class__._known_devices = unknown_devices
+                        self.__client.disconnectDevice(device, asynchronous=True)
+                if device.name != prev_device_name:
+                    futures.append((device, prev_device_name, self.__client.updateDevice(device, asynchronous=True)))
+            for device, prev_device_name, future in futures:
+                future.wait()
+                try:
+                    future.result()
+                    updated_devices.append(device.id)
+                except cc_lib.client.DeviceUpdateError:
+                    device.name = prev_device_name
+        if any((missing_devices, new_devices, updated_devices)):
+            try:
+                self.__client.syncHub(list(self.__device_manager.devices.values()), asynchronous=True)
+            except cc_lib.client.HubError:
+                pass
