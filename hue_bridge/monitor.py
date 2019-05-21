@@ -37,7 +37,6 @@ class Monitor(Thread):
         self.daemon = True
         self.__device_manager = device_manager
         self.__client = client
-        #self.__known_devices = dict()
 
     def run(self):
         while True:
