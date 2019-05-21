@@ -20,11 +20,24 @@ if __name__ == '__main__':
 
 
 from .configuration import config
+from threading import Lock
 import cc_lib
 
 
 class Device(cc_lib.device.Device):
-    def __init__(self, id: str, name: str, key: str, model: str):
+    def __init__(self, id: str, name: str, model: str, state: dict, number: str):
         super().__init__(id, config.Senergy.device_type, name)
-        self.key = key
+        self.__state_lock = Lock()
         self.model = model
+        self.state = state
+        self.number = number
+
+    @property
+    def state(self):
+        with self.__state_lock:
+            return self.__state
+
+    @state.setter
+    def state(self, arg):
+        with self.__state_lock:
+            self.__state = arg
