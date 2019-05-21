@@ -14,62 +14,51 @@
    limitations under the License.
 """
 
-try:
-    from connector_lib.modules.http_lib import Methods as http
-    from connector_lib.modules.device_pool import DevicePool
-    from connector_lib.client import Client
-    from hue_bridge.configuration import config
-    from hue_bridge.monitor import Monitor
-    from hue_bridge.logger import root_logger
-    from hue_bridge.discovery import discoverBridge
-except ImportError as ex:
-    exit("{} - {}".format(__name__, ex.msg))
+
+from hue_bridge.logger import root_logger
+from hue_bridge.discovery import discoverBridge
+from hue_bridge.device_manager import DeviceManager
+from hue_bridge.monitor import Monitor
+from hue_bridge.controller import Controller
 from time import sleep
-import json
+import cc_lib
 
 
 logger = root_logger.getChild(__name__)
 
+device_manager = DeviceManager()
 
-def bridgeController():
-    while True:
-        if Monitor.bridge_map:
-            task = Client.receive()
-            try:
-                for part in task.payload.get('protocol_parts'):
-                    if part.get('name') == 'data':
-                        command = part.get('value')
-                command = json.loads(command)
-                command['xy'] = Monitor.bridge_map.get(task.payload.get('device_url'))[1].rgb_to_xy(command.get('r'), command.get('g'), command.get('b'))
-                del command['r']
-                del command['g']
-                del command['b']
-                command = json.dumps(command)
-                http_resp = http.put(
-                    'http://{}:{}/{}/{}/lights/{}/state'.format(
-                        config.Bridge.host,
-                        config.Bridge.port,
-                        config.Bridge.api_path,
-                        config.Bridge.api_key,
-                        Monitor.bridge_map.get(task.payload.get('device_url'))[0]
-                    ),
-                    command,
-                    headers={'Content-Type': 'application/json'}
-                )
-                if not http_resp.status == 200:
-                    logger.error("could not route message to hue bridge - '{}'".format(http_resp.status))
-                response = str(http_resp.status)
-            except Exception as ex:
-                logger.error("error handling task - '{}'".format(ex))
-                response = '500'
-            Client.response(task, response)
-        else:
-            logger.debug("waiting for device map to be populated")
-            sleep(0.5)
+
+def on_connect(client: cc_lib.client.Client):
+    devices = device_manager.devices
+    for device in devices.values():
+        try:
+            if device.state["reachable"]:
+                client.connectDevice(device, asynchronous=True)
+        except cc_lib.client.exception.DeviceConnectError:
+            pass
+
+
+connector_client = cc_lib.client.Client()
+connector_client.setConnectClbk(on_connect)
+
+bridge_monitor = Monitor(device_manager, connector_client)
+bridge_controller = Controller(device_manager, connector_client)
 
 
 if __name__ == '__main__':
     discoverBridge()
-    bridge_monitor = Monitor()
-    client_connector = Client(device_manager=DevicePool)
-    bridgeController()
+    while True:
+        try:
+            connector_client.initHub()
+            break
+        except cc_lib.client.HubInitializationError:
+            sleep(10)
+    connector_client.connect(reconnect=True)
+    bridge_monitor.start()
+    bridge_controller.start()
+    try:
+        bridge_monitor.join()
+        bridge_controller.join()
+    except KeyboardInterrupt:
+        print("\ninterrupted by user\n")
