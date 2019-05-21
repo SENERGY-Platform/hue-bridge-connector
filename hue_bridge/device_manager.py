@@ -19,7 +19,8 @@ if __name__ == '__main__':
     exit('Please use "client.py"')
 
 
-from typing import List, Dict
+from .device import Device
+from typing import Dict
 from threading import Lock
 import cc_lib
 
@@ -33,7 +34,7 @@ def isDevice(obj: object) -> bool:
     :param obj: object to check
     :return: Boolean
     """
-    if type(obj) is cc_lib.device.Device or issubclass(type(obj), cc_lib.device.Device):
+    if type(obj) is Device or issubclass(type(obj), Device):
         return True
     return False
 
@@ -44,7 +45,7 @@ class DeviceManager:
         self.__device_pool = dict()
         self.__lock = Lock()
 
-    def add(self, device: cc_lib.device.Device) -> None:
+    def add(self, device: Device) -> None:
         if not isDevice(device):
             raise TypeError
         self.__lock.acquire()
@@ -64,7 +65,7 @@ class DeviceManager:
             logger.warning("device '{}' does not exist in device pool".format(device_id))
         self.__lock.release()
 
-    def get(self, device_id: str) -> cc_lib.device.Device:
+    def get(self, device_id: str) -> Device:
         if type(device_id) is not str:
             raise TypeError
         self.__lock.acquire()
@@ -83,7 +84,7 @@ class DeviceManager:
         self.__lock.release()
 
     @property
-    def devices(self) -> Dict[str, cc_lib.device.Device]:
+    def devices(self) -> Dict[str, Device]:
         self.__lock.acquire()
         devices = self.__device_pool.copy()
         self.__lock.release()
