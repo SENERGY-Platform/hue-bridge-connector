@@ -195,10 +195,10 @@ def validateHosts(hosts) -> dict:
 
 
 def discoverBridge():
+    host = None
     if config.Bridge.host:
         if validateHost(config.Bridge.host):
-            return
-    host = None
+            host = config.Bridge.host
     while not host:
         host = discoverNUPnP()
         if host and not validateHost(host):
@@ -219,5 +219,6 @@ def discoverBridge():
         else:
             continue
         time.sleep(10)
-    config.Bridge.host = host
-    logger.info("discovered hue bridge at '{}'".format(host))
+    if config.Bridge.host != host:
+        config.Bridge.host = host
+    logger.info("discovered hue bridge '{}' at '{}'".format(config.Bridge.id, config.Bridge.host))
