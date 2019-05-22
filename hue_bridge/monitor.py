@@ -31,9 +31,8 @@ logger = root_logger.getChild(__name__.split(".", 1)[-1])
 
 
 class Monitor(Thread):
-    def __init__(self, device_manager: DeviceManager, client: cc_lib.client.Client):
-        super().__init__()
-        self.daemon = True
+    def __init__(self, device_manager: DeviceManager, client: cc_lib.client.Client, bridge_id: str):
+        super().__init__(name="monitor-{}".format(bridge_id), daemon=True)
         self.__device_manager = device_manager
         self.__client = client
 
