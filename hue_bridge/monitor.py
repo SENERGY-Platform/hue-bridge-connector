@@ -37,6 +37,7 @@ class Monitor(Thread):
         self.__client = client
 
     def run(self):
+        logger.info("starting '{}' ...".format(self.name))
         while True:
             queried_devices = self.__queryBridge()
             if queried_devices:
