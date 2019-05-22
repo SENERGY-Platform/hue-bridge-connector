@@ -16,6 +16,7 @@
 
 
 from hue_bridge.logger import root_logger
+from hue_bridge.configuration import config
 from hue_bridge.discovery import discoverBridge
 from hue_bridge.device_manager import DeviceManager
 from hue_bridge.monitor import Monitor
@@ -42,8 +43,8 @@ def on_connect(client: cc_lib.client.Client):
 connector_client = cc_lib.client.Client()
 connector_client.setConnectClbk(on_connect)
 
-bridge_monitor = Monitor(device_manager, connector_client)
-bridge_controller = Controller(device_manager, connector_client)
+bridge_monitor = Monitor(device_manager, connector_client, config.Bridge.id)
+bridge_controller = Controller(device_manager, connector_client, config.Bridge.id)
 
 
 if __name__ == '__main__':
