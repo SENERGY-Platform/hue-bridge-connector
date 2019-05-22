@@ -42,7 +42,7 @@ class Monitor(Thread):
             queried_devices = self.__queryBridge()
             if queried_devices:
                 self.__evaluate(queried_devices)
-            time.sleep(15)
+            time.sleep(10)
 
     def __queryBridge(self):
         try:
