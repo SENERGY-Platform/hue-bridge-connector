@@ -15,37 +15,35 @@
 """
 
 
-# if __name__ == '__main__':
-#     exit('Please use "client.py"')
+__all__ = ('device_type_map', 'ExtendedColorLight')
+
+if __name__ == '__main__':
+    exit('Please use "client.py"')
 
 
-#from .configuration import config
-from rgbxy import Converter, get_light_gamut
+from .service import SetColor, SetOn, SetOff, SetBrightness, GetStatus
 from threading import Lock
 import cc_lib
-
-
-converter_pool = dict()
-
-def getConverter(model: str):
-    if not model in converter_pool:
-        converter = Converter(get_light_gamut(model))
-        converter_pool[model] = converter
-        return converter
-    return converter_pool[model]
 
 
 class ExtendedColorLight(cc_lib.types.Device):
     uri = "iot#94e1bbee-7d04-4117-aba3-968a1b246222"
     description = "Device type for Hue color lamp and lightstrip plus"
+    services = {
+        'setOn': SetOn,
+        'setOff': SetOff,
+        'setColor': SetColor,
+        'setBrightness': SetBrightness,
+        'getStatus': GetStatus
+    }
 
     def __init__(self, id: str, name: str, model: str, state: dict, number: str):
         self.id = id
         self.name = name
-        self.__state_lock = Lock()
         self.model = model
-        self.state = state
         self.number = number
+        self.__state_lock = Lock()
+        self.state = state
 
     @property
     def state(self):
@@ -57,6 +55,10 @@ class ExtendedColorLight(cc_lib.types.Device):
         with self.__state_lock:
             self.__state = arg
 
+    def getService(self, srv_handler: str, *args, **kwargs):
+        service = super().getService(srv_handler)
+        return service.task(self, *args, **kwargs)
+
     def __iter__(self):
         items = (
             ("name", self.name),
@@ -66,53 +68,6 @@ class ExtendedColorLight(cc_lib.types.Device):
         )
         for item in items:
             yield item
-
-    class setColorInput:
-        red = int
-        green = int
-        blue = int
-
-    class setColorOutput:
-        status = int
-
-    @cc_lib.device.service(input=setColorInput, output=setColorOutput)
-    def setColor(self, red: int, green: int, blue: int):
-        return {"xy": getConverter(self.model).rgb_to_xy(red, green, blue)}
-
-    class setOnOutput:
-        status = int
-
-    @cc_lib.device.service(output=setOnOutput)
-    def setOn(self):
-        return {"on": True}
-
-    class setOffOutput:
-        status = int
-
-    @cc_lib.device.service(output=setOffOutput)
-    def setOff(self):
-        return {"on": False}
-
-    class setBrightnessInput:
-        brightness = int
-
-    class setBrightnessOutput:
-        status = int
-
-    @cc_lib.device.service(input=setBrightnessInput, output=setBrightnessOutput)
-    def setBrightness(self, brightness):
-        return {"bri": brightness}
-
-    class getStateOutput:
-        on = bool
-        brightness = int
-        red = int
-        green = int
-        blue = int
-
-    @cc_lib.device.service(output=getStateOutput)
-    def getState(self):
-        pass
 
 
 device_type_map = {
