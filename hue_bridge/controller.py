@@ -22,8 +22,6 @@ if __name__ == '__main__':
 from .configuration import config
 from .logger import root_logger
 from .device_manager import DeviceManager
-from .device import Device
-from rgbxy import Converter, get_light_gamut
 from threading import Thread
 from queue import Queue, Empty
 import time, json, requests, cc_lib
@@ -32,18 +30,8 @@ import time, json, requests, cc_lib
 logger = root_logger.getChild(__name__.split(".", 1)[-1])
 
 
-converter_pool = dict()
-
-def getConverter(model: str):
-    if not model in converter_pool:
-        converter = Converter(get_light_gamut(model))
-        converter_pool[model] = converter
-        return converter
-    return converter_pool[model]
-
-
 class Worker(Thread):
-    def __init__(self, device: Device, client: cc_lib.client.Client):
+    def __init__(self, device, client: cc_lib.client.Client):
         super().__init__(name="worker-{}".format(device.id), daemon=True)
         self.__device = device
         self.__client = client
@@ -55,37 +43,21 @@ class Worker(Thread):
         while not self.__stop:
             try:
                 command: cc_lib.client.message.Envelope = self.__command_queue.get(timeout=30)
-                cmd_resp = cc_lib.client.message.Message("")
+                logger.debug("{}: '{}'".format(self.name, command))
                 try:
-                    data = json.loads(command.message.data)
-                    #######
-                    data["xy"] = getConverter(self.__device.model).rgb_to_xy(data["r"], data["g"],data["b"])
-                    del data["r"]
-                    del data["g"]
-                    del data["b"]
-                    #####
-                    bridge_resp = requests.put(
-                        url="https://{}/{}/{}/lights/{}/state".format(
-                            config.Bridge.host,
-                            config.Bridge.api_path,
-                            config.Bridge.api_key,
-                            self.__device.number
-                        ),
-                        json=data,
-                        verify=False
-                    )
-                    if not bridge_resp.status_code == 200:
-                        logger.error(
-                            "{}: error executing command on bridge - {}".format(self.name, bridge_resp.status_code)
-                        )
-                    cmd_resp.data = json.dumps(bridge_resp.status_code)
+                    if command.message.data:
+                        data = self.__device.getService(command.service_uri, **json.loads(command.message.data))
+                    else:
+                        data = self.__device.getService(command.service_uri)
+                    cmd_resp = cc_lib.client.message.Message(json.dumps(data))
                 except json.JSONDecodeError as ex:
                     logger.error("{}: could not parse command data - {}".format(self.name, ex))
-                    cmd_resp.data = json.dumps(500)
-                except requests.exceptions.RequestException as ex:
-                    logger.error("{}: could not send command to bridge - {}".format(self.name, ex))
-                    cmd_resp.data = json.dumps(500)
+                    cmd_resp = cc_lib.client.message.Message(json.dumps({"status": 1}))
+                except TypeError as ex:
+                    logger.error("{}: could not parse command response data - {}".format(self.name, ex))
+                    cmd_resp = cc_lib.client.message.Message(json.dumps({"status": 1}))
                 command.message = cmd_resp
+                logger.debug("{}: '{}'".format(self.name, command))
                 self.__client.sendResponse(command, asynchronous=True)
             except Empty:
                 pass
@@ -129,11 +101,6 @@ class Controller(Thread):
                 if time.time() - garbage_collector_time > 120:
                     self.__collectGarbage()
                     garbage_collector_time = time.time()
-
-    def __executeCommand(self, command: cc_lib.client.message.Envelope, device: Device):
-        response_msg = cc_lib.client.message.Message("ok")
-        command.message = response_msg
-        self.__client.sendResponse(command)
 
     def __collectGarbage(self):
         logger.debug("running garbage collector ...")
