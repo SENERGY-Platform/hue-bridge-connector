@@ -22,7 +22,7 @@ if __name__ == '__main__':
 from .configuration import config
 from .logger import root_logger
 from .device_manager import DeviceManager
-from .device import Device
+from .types.device import device_type_map
 from threading import Thread
 import time, requests, cc_lib
 
@@ -108,9 +108,10 @@ class Monitor(Thread):
         if new_devices:
             futures = list()
             for device_id in new_devices:
-                device = Device(device_id, **queried_devices[device_id][0])
+                device = device_type_map[queried_devices[device_id][1]["product_type"]](device_id, **queried_devices[device_id][0])
                 for key, value in queried_devices[device_id][1].items():
-                    device.addTag(key, value)
+                    if not key == "product_type":
+                        device.addTag(key, value)
                 logger.info("found '{}' with id '{}'".format(device.name, device.id))
                 futures.append((device, self.__client.addDevice(device, asynchronous=True)))
             for device, future in futures:
