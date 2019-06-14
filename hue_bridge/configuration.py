@@ -39,7 +39,12 @@ class HueConf:
 
     @section
     class Senergy:
-        device_type = None
+        dt_extended_color_light = None
+        st_set_color = None
+        st_set_on = None
+        st_set_off = None
+        st_set_brightness = None
+        st_get_status = None
 
     @section
     class Logger:
