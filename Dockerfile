@@ -10,6 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN mkdir cc-lib
-RUN touch hue_bridge/bridge.conf
+RUN touch bridge.conf
 
 CMD [ "python", "./client.py"]
