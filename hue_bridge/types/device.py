@@ -23,11 +23,12 @@ if __name__ == '__main__':
 
 from .service import SetColor, SetOn, SetOff, SetBrightness, GetStatus
 from threading import Lock
+from ..configuration import config
 import cc_lib
 
 
 class ExtendedColorLight(cc_lib.types.Device):
-    uri = "iot#94e1bbee-7d04-4117-aba3-968a1b246222"
+    uri = config.Senergy.dt_extended_color_light
     description = "Device type for Hue color lamp and lightstrip plus"
     services = {
         'setOn': SetOn,

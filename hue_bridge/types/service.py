@@ -96,7 +96,7 @@ def hueBridgeGet(d_number: str):
 
 @cc_lib.types.actuator_service
 class SetColor:
-    uri = "iot#5efb0b6a-041f-4da4-9d38-45ddffc789ad"
+    uri = config.Senergy.st_set_color
     name = "Set Color"
     description = "Set light color via RGB code."
 
@@ -110,7 +110,7 @@ class SetColor:
 
 @cc_lib.types.actuator_service
 class SetOn:
-    uri = "iot#08e5e6f7-6f6a-424e-95ed-cda013b11475"
+    uri = config.Senergy.st_set_on
     name = "Set On"
     description = "Turn on light."
 
@@ -124,7 +124,7 @@ class SetOn:
 
 @cc_lib.types.actuator_service
 class SetOff:
-    uri = "iot#97dd54ac-0b25-4f89-8442-706de10b30cc"
+    uri = config.Senergy.st_set_off
     name = "Set Off"
     description = "Turn off light."
 
@@ -138,7 +138,7 @@ class SetOff:
 
 @cc_lib.types.actuator_service
 class SetBrightness:
-    uri = "iot#07d50e8f-e80f-4baa-8a74-debe93942fb6"
+    uri = config.Senergy.st_set_brightness
     name = "Set Brightness"
     description = "Set light brightness."
 
@@ -152,7 +152,7 @@ class SetBrightness:
 
 @cc_lib.types.sensor_service
 class GetStatus:
-    uri = "iot#ca8f7938-3869-49ec-abb4-34c34f7d8f34"
+    uri = config.Senergy.st_get_status
     name = "Get Status"
     description = "Get light status parameters."
 
