@@ -57,5 +57,5 @@ config = HueConf('bridge.conf', getcwd())
 if not all((config.Bridge.id, config.Bridge.api_path, config.Bridge.api_key, config.Cloud.host, config.Cloud.api_path)):
     exit('Please provide Hue Bridge information')
 
-if not all((config.Senergy.dt_extended_color_light, config.Senergy.st_set_color. config.Senergy.st_set_on, config.Senergy.st_set_off, config.Senergy.st_set_brightness, config.Senergy.st_get_status)):
+if not all((config.Senergy.dt_extended_color_light, config.Senergy.st_set_color, config.Senergy.st_set_on, config.Senergy.st_set_off, config.Senergy.st_set_brightness, config.Senergy.st_get_status)):
     exit('Please provide a SENERGY device and service types')
