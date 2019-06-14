@@ -2,7 +2,7 @@ FROM python:3-alpine
 
 WORKDIR /usr/src/app
 
-#RUN apk update && apk upgrade && apk add --no-cache bash git openssh
+RUN apk update && apk upgrade && apk add --no-cache git
 #RUN git clone https://github.com/SENERGY-Platform/hue-bridge-connector.git .
 #RUN git checkout dev
 
