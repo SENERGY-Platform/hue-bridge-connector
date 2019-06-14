@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
 
 from simple_conf import configuration, section
-import os, inspect
+from os import getcwd
 
 
 @configuration
@@ -51,7 +51,7 @@ class HueConf:
         level = "info"
 
 
-config = HueConf('bridge.conf', os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
+config = HueConf('bridge.conf', getcwd())
 
 
 if not all((config.Bridge.id, config.Bridge.api_path, config.Bridge.api_key, config.Cloud.host, config.Cloud.api_path)):
