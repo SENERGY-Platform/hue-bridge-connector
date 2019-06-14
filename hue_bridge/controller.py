@@ -24,7 +24,7 @@ from .logger import root_logger
 from .device_manager import DeviceManager
 from threading import Thread
 from queue import Queue, Empty
-import time, json, requests, cc_lib
+import time, json, cc_lib
 
 
 logger = root_logger.getChild(__name__.split(".", 1)[-1])
