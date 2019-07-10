@@ -15,7 +15,7 @@
 """
 
 
-__all__ = ('SetBrightness', 'SetOff', 'SetOn', 'SetColor', 'GetStatus')
+__all__ = ('SetBrightness', 'SetOff', 'SetOn', 'SetColor', 'GetStatus', 'PlugSetOn', 'PlugSetOff', 'PlugGetStatus')
 
 
 if __name__ == '__main__':
@@ -92,6 +92,9 @@ def hueBridgeGet(d_number: str):
             return True, resp.status_code
     except exceptions.RequestException:
         return True, "could not send request to hue bridge"
+
+
+### Extended color light ###
 
 
 @cc_lib.types.actuator_service
@@ -176,5 +179,57 @@ class GetStatus:
             payload["green"] = rgb[1]
             payload["blue"] = rgb[2]
             payload["brightness"] = body["bri"]
+        payload["status"] = int(err)
+        return payload
+
+
+### On/Off plug-in unit ###
+
+
+@cc_lib.types.actuator_service
+class PlugSetOn:
+    uri = config.Senergy.st_plug_set_on
+    name = "Set On"
+    description = "Turn on plug."
+
+    @staticmethod
+    def task(device):
+        err, body = hueBridgePut(device.number, {"on": True})
+        if err:
+            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+        return {"status": int(err)}
+
+
+@cc_lib.types.actuator_service
+class PlugSetOff:
+    uri = config.Senergy.st_plug_set_off
+    name = "Set Off"
+    description = "Turn off plug."
+
+    @staticmethod
+    def task(device):
+        err, body = hueBridgePut(device.number, {"on": False})
+        if err:
+            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+        return {"status": int(err)}
+
+
+@cc_lib.types.sensor_service
+class PlugGetStatus:
+    uri = config.Senergy.st_plug_get_status
+    name = "Get Status"
+    description = "Get plug status parameters."
+
+    @staticmethod
+    def task(device):
+        payload = {
+                "status": 0,
+                "on": False
+            }
+        err, body = hueBridgeGet(device.number)
+        if err:
+            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+        else:
+            payload["on"] = body["on"]
         payload["status"] = int(err)
         return payload

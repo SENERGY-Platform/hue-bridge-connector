@@ -21,7 +21,7 @@ if __name__ == '__main__':
     exit('Please use "client.py"')
 
 
-from .service import SetColor, SetOn, SetOff, SetBrightness, GetStatus
+from .service import SetColor, SetOn, SetOff, SetBrightness, GetStatus, PlugSetOn, PlugSetOff, PlugGetStatus
 from threading import Lock
 from ..configuration import config
 import cc_lib
@@ -71,6 +71,49 @@ class ExtendedColorLight(cc_lib.types.Device):
             yield item
 
 
+class OnOffPlugInUnit(cc_lib.types.Device):
+    uri = config.Senergy.dt_on_off_plug_in_unit
+    description = "Device type for On/Off plug-in unit"
+    services = {
+        'setOn': PlugSetOn,
+        'setOff': PlugSetOff,
+        'getStatus': PlugGetStatus
+    }
+
+    def __init__(self, id: str, name: str, model: str, state: dict, number: str):
+        self.id = id
+        self.name = name
+        self.model = model
+        self.number = number
+        self.__state_lock = Lock()
+        self.state = state
+
+    @property
+    def state(self):
+        with self.__state_lock:
+            return self.__state
+
+    @state.setter
+    def state(self, arg):
+        with self.__state_lock:
+            self.__state = arg
+
+    def getService(self, srv_handler: str, *args, **kwargs):
+        service = super().getService(srv_handler)
+        return service.task(self, *args, **kwargs)
+
+    def __iter__(self):
+        items = (
+            ("name", self.name),
+            ("model", self.model),
+            ("state", self.state),
+            ("number", self.number)
+        )
+        for item in items:
+            yield item
+
+
 device_type_map = {
-    "Extended color light": ExtendedColorLight
+    "Extended color light": ExtendedColorLight,
+    "On/Off plug-in unit": OnOffPlugInUnit
 }
