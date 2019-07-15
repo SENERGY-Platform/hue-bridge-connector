@@ -36,7 +36,7 @@ def on_connect(client: cc_lib.client.Client):
         try:
             if device.state["reachable"]:
                 client.connectDevice(device, asynchronous=True)
-        except cc_lib.client.exception.DeviceConnectError:
+        except cc_lib.client.DeviceConnectError:
             pass
 
 
