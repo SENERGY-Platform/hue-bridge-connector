@@ -105,7 +105,7 @@ class SetColor:
 
     @staticmethod
     def task(device, red: int, green: int, blue: int):
-        err, body = hueBridgePut(device.number, {"xy": getConverter(device.model).rgb_to_xy(red, green, blue)})
+        err, body = hueBridgePut(device.number, {"on": True, "xy": getConverter(device.model).rgb_to_xy(red, green, blue)})
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
@@ -147,7 +147,7 @@ class SetBrightness:
 
     @staticmethod
     def task(device, brightness):
-        err, body = hueBridgePut(device.number, {"bri": brightness})
+        err, body = hueBridgePut(device.number, {"on": True, "bri": brightness})
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
