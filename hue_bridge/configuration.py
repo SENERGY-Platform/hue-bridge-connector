@@ -42,6 +42,7 @@ class HueConf:
         dt_extended_color_light = None
         dt_on_off_plug_in_unit = None
         st_set_color = None
+        st_set_kelvin = None
         st_set_on = None
         st_set_off = None
         st_set_brightness = None
@@ -65,6 +66,7 @@ if not all(
         (
                 config.Senergy.dt_extended_color_light,
                 config.Senergy.st_set_color,
+                config.Senergy.st_set_kelvin,
                 config.Senergy.st_set_on,
                 config.Senergy.st_set_off,
                 config.Senergy.st_set_brightness,
