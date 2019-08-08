@@ -129,13 +129,14 @@ class SetColor:
     description = "Set light color via Hue, Saturation and Brightness values."
 
     @staticmethod
-    def task(device, hue: int, saturation: int, brightness: int):
+    def task(device, hue: int, saturation: int, brightness: int, duration: float):
         err, body = hueBridgePut(
             device.number,
             {
                 "on": True,
                 "xy": getConverter(device.model).rgb_to_xy(*convertHSBToRGB(hue, saturation, brightness)),
-                "bri": round(brightness * 255 / 100)
+                "bri": round(brightness * 255 / 100),
+                "transitiontime": int(duration * 10)
             }
         )
         if err:
@@ -150,8 +151,8 @@ class SetOn:
     description = "Turn on light."
 
     @staticmethod
-    def task(device):
-        err, body = hueBridgePut(device.number, {"on": True})
+    def task(device, duration):
+        err, body = hueBridgePut(device.number, {"on": True, "transitiontime": int(duration * 10)})
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
@@ -164,8 +165,8 @@ class SetOff:
     description = "Turn off light."
 
     @staticmethod
-    def task(device):
-        err, body = hueBridgePut(device.number, {"on": False})
+    def task(device, duration):
+        err, body = hueBridgePut(device.number, {"on": False, "transitiontime": int(duration * 10)})
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
@@ -178,8 +179,8 @@ class SetBrightness:
     description = "Set light brightness."
 
     @staticmethod
-    def task(device, brightness):
-        err, body = hueBridgePut(device.number, {"on": True, "bri": brightness})
+    def task(device, brightness, duration):
+        err, body = hueBridgePut(device.number, {"on": True, "bri": brightness, "transitiontime": int(duration * 10)})
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
@@ -192,8 +193,11 @@ class SetKelvin:
     description = "Set light kelvin temperature."
 
     @staticmethod
-    def task(device, kelvin):
-        err, body = hueBridgePut(device.number, {"on": True, "ct": convertKelvinToMired(kelvin)})
+    def task(device, kelvin, duration):
+        err, body = hueBridgePut(
+            device.number,
+            {"on": True, "ct": convertKelvinToMired(kelvin), "transitiontime": int(duration * 10)}
+        )
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
