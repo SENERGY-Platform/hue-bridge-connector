@@ -15,7 +15,7 @@
 """
 
 
-__all__ = ('SetBrightness', 'SetOff', 'SetOn', 'SetColor', 'GetStatus', 'PlugSetOn', 'PlugSetOff', 'PlugGetStatus')
+__all__ = ('SetBrightness', 'SetOff', 'SetOn', 'SetKelvin', 'SetColor', 'GetStatus', 'PlugSetOn', 'PlugSetOff', 'PlugGetStatus')
 
 
 if __name__ == '__main__':
@@ -26,7 +26,7 @@ from ..configuration import config
 from ..logger import root_logger
 from rgbxy import Converter, get_light_gamut
 from requests import put, get, exceptions
-import cc_lib
+import cc_lib, colorsys
 
 
 logger = root_logger.getChild(__name__.split(".", 1)[-1])
@@ -94,18 +94,50 @@ def hueBridgeGet(d_number: str):
         return True, "could not send request to hue bridge"
 
 
+def convertHSBToRGB(hue, sat, bri):
+    return tuple(round(val * 255) for val in colorsys.hsv_to_rgb(hue / 360, sat / 100, bri / 100))
+
+
+def convertKelvinToMired(temp):
+    return round(1000000 / temp)
+
+
 ### Extended color light ###
+
+
+# @cc_lib.types.actuator_service
+# class SetColor:
+#     uri = config.Senergy.st_set_color
+#     name = "Set Color RGB"
+#     description = "Set light color via Red, Green and Blue values."
+#
+#     @staticmethod
+#     def task(device, red: int, green: int, blue: int):
+#         err, body = hueBridgePut(
+#             device.number,
+#             {"on": True, "xy": getConverter(device.model).rgb_to_xy(red, green, blue)}
+#         )
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+#         return {"status": int(err)}
 
 
 @cc_lib.types.actuator_service
 class SetColor:
     uri = config.Senergy.st_set_color
     name = "Set Color"
-    description = "Set light color via RGB code."
+    description = "Set light color via Hue, Saturation and Brightness values."
 
     @staticmethod
-    def task(device, red: int, green: int, blue: int):
-        err, body = hueBridgePut(device.number, {"on": True, "xy": getConverter(device.model).rgb_to_xy(red, green, blue)})
+    def task(device, hue: int, saturation: int, brightness: int):
+        err, body = hueBridgePut(
+            device.number,
+            {
+                "on": True,
+                "xy": getConverter(device.model).rgb_to_xy(*convertHSBToRGB(hue, saturation, brightness)),
+                "bri": round(brightness * 255 / 100)
+            }
+        )
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
@@ -148,6 +180,20 @@ class SetBrightness:
     @staticmethod
     def task(device, brightness):
         err, body = hueBridgePut(device.number, {"on": True, "bri": brightness})
+        if err:
+            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+        return {"status": int(err)}
+
+
+@cc_lib.types.actuator_service
+class SetKelvin:
+    uri = config.Senergy.st_set_kelvin
+    name = "Set Kelvin"
+    description = "Set light kelvin temperature."
+
+    @staticmethod
+    def task(device, kelvin):
+        err, body = hueBridgePut(device.number, {"on": True, "ct": convertKelvinToMired(kelvin)})
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
