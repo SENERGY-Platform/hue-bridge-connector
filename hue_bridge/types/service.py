@@ -197,7 +197,7 @@ class SetKelvin:
     def task(device, kelvin, duration):
         err, body = hueBridgePut(
             device.number,
-            {"on": True, "ct": convertKelvinToMired(kelvin), "transitiontime": int(duration * 10)}
+            {"on": True, "ct": round(1000000 / kelvin), "transitiontime": int(duration * 10)}
         )
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
