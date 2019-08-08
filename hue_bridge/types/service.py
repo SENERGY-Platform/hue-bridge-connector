@@ -98,8 +98,9 @@ def convertHSBToRGB(hue, sat, bri):
     return tuple(round(val * 255) for val in colorsys.hsv_to_rgb(hue / 360, sat / 100, bri / 100))
 
 
-def convertKelvinToMired(temp):
-    return round(1000000 / temp)
+def convertRGBToHSB(red, green, blue):
+    hue, saturation, brightness = colorsys.rgb_to_hsv(red / 255, green / 255, blue / 255)
+    return (round(hue * 360), round(saturation * 100), round(brightness * 100))
 
 
 ### Extended color light ###
