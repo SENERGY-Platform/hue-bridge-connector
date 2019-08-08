@@ -21,7 +21,7 @@ if __name__ == '__main__':
     exit('Please use "client.py"')
 
 
-from .service import SetColor, SetOn, SetOff, SetBrightness, GetStatus, PlugSetOn, PlugSetOff, PlugGetStatus
+from .service import SetKelvin, SetColor, SetOn, SetOff, SetBrightness, GetStatus, PlugSetOn, PlugSetOff, PlugGetStatus
 from threading import Lock
 from ..configuration import config
 import cc_lib
@@ -35,6 +35,7 @@ class ExtendedColorLight(cc_lib.types.Device):
         'setOff': SetOff,
         'setColor': SetColor,
         'setBrightness': SetBrightness,
+        'setKelvin': SetKelvin,
         'getStatus': GetStatus
     }
 
