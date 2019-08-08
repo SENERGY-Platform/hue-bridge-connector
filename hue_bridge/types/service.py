@@ -215,21 +215,21 @@ class GetStatus:
         payload = {
                 "status": 0,
                 "on": False,
-                "red": 0,
-                "green": 0,
-                "blue": 0,
-                "brightness": 0
+                "hue": 0,
+                "saturation": 0,
+                "brightness": 0,
+                "kelvin": 0
             }
         err, body = hueBridgeGet(device.number)
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         else:
-            rgb = getConverter(device.model).xy_to_rgb(body["xy"][0], body["xy"][1])
+            hsb = convertRGBToHSB(*getConverter(device.model).xy_to_rgb(body["xy"][0], body["xy"][1]))
             payload["on"] = body["on"]
-            payload["red"] = rgb[0]
-            payload["green"] = rgb[1]
-            payload["blue"] = rgb[2]
-            payload["brightness"] = body["bri"]
+            payload["hue"] = hsb[0]
+            payload["saturation"] = hsb[1]
+            payload["brightness"] = hsb[2]
+            payload["kelvin"] = round(round(1000000 / body["ct"]) / 10) * 10
         payload["status"] = int(err)
         return payload
 
