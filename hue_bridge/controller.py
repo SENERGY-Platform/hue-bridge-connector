@@ -58,7 +58,8 @@ class Worker(Thread):
                     cmd_resp = cc_lib.client.message.Message(json.dumps({"status": 1}))
                 command.message = cmd_resp
                 logger.debug("{}: '{}'".format(self.name, command))
-                self.__client.sendResponse(command, asynchronous=True)
+                if command.completion_strategy is cc_lib.client.CompletionStrategy.pessimistic:
+                    self.__client.sendResponse(command, asynchronous=True)
             except Empty:
                 pass
         del self.__device
