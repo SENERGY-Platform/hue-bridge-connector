@@ -181,7 +181,10 @@ class SetBrightness:
 
     @staticmethod
     def task(device, brightness, duration):
-        err, body = hueBridgePut(device.number, {"on": True, "bri": brightness, "transitiontime": int(duration * 10)})
+        err, body = hueBridgePut(
+            device.number,
+            {"on": True, "bri": round(brightness * 255 / 100), "transitiontime": int(duration * 10)}
+        )
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
@@ -191,13 +194,18 @@ class SetBrightness:
 class SetKelvin:
     uri = config.Senergy.st_set_kelvin
     name = "Set Kelvin"
-    description = "Set light kelvin temperature."
+    description = "Set light kelvin temperature and brightness."
 
     @staticmethod
-    def task(device, kelvin, duration):
+    def task(device, kelvin, brightness, duration):
         err, body = hueBridgePut(
             device.number,
-            {"on": True, "ct": round(1000000 / kelvin), "transitiontime": int(duration * 10)}
+            {
+                "on": True,
+                "ct": round(1000000 / kelvin),
+                "bri": round(brightness * 255 / 100),
+                "transitiontime": int(duration * 10)
+            }
         )
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
