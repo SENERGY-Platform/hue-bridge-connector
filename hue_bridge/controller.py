@@ -43,23 +43,31 @@ class Worker(Thread):
         while not self.__stop:
             try:
                 command: cc_lib.client.message.Envelope = self.__command_queue.get(timeout=30)
-                logger.debug("{}: '{}'".format(self.name, command))
-                try:
-                    if command.message.data:
-                        data = self.__device.getService(command.service_uri, **json.loads(command.message.data))
-                    else:
-                        data = self.__device.getService(command.service_uri)
-                    cmd_resp = cc_lib.client.message.Message(json.dumps(data))
-                except json.JSONDecodeError as ex:
-                    logger.error("{}: could not parse command data - {}".format(self.name, ex))
-                    cmd_resp = cc_lib.client.message.Message(json.dumps({"status": 1}))
-                except TypeError as ex:
-                    logger.error("{}: could not parse command response data - {}".format(self.name, ex))
-                    cmd_resp = cc_lib.client.message.Message(json.dumps({"status": 1}))
-                command.message = cmd_resp
-                logger.debug("{}: '{}'".format(self.name, command))
-                if command.completion_strategy is cc_lib.client.CompletionStrategy.pessimistic:
-                    self.__client.sendResponse(command, asynchronous=True)
+                if time.time() - command.cmd_timestamp <= 10:
+                    logger.debug("{}: '{}'".format(self.name, command))
+                    try:
+                        if command.message.data:
+                            data = self.__device.getService(command.service_uri, **json.loads(command.message.data))
+                        else:
+                            data = self.__device.getService(command.service_uri)
+                        cmd_resp = cc_lib.client.message.Message(json.dumps(data))
+                    except json.JSONDecodeError as ex:
+                        logger.error("{}: could not parse command data - {}".format(self.name, ex))
+                        cmd_resp = cc_lib.client.message.Message(json.dumps({"status": 1}))
+                    except TypeError as ex:
+                        logger.error("{}: could not parse command response data - {}".format(self.name, ex))
+                        cmd_resp = cc_lib.client.message.Message(json.dumps({"status": 1}))
+                    command.message = cmd_resp
+                    logger.debug("{}: '{}'".format(self.name, command))
+                    if command.cmd_strategy is cc_lib.client.CompletionStrategy.pessimistic:
+                        self.__client.sendResponse(command, asynchronous=True)
+                else:
+                    logger.warning(
+                        "{}: dropped command - max age exceeded - correlation id: {}".format(
+                            self.name,
+                            command.correlation_id
+                        )
+                    )
             except Empty:
                 pass
         del self.__device
