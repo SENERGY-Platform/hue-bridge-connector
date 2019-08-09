@@ -55,6 +55,10 @@ class HueConf:
     class Logger:
         level = "info"
 
+    @section
+    class Controller:
+        max_command_age = 15
+
 
 config = HueConf('bridge.conf', getcwd())
 
