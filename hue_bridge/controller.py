@@ -42,8 +42,8 @@ class Worker(Thread):
         logger.debug("'{}': starting ...".format(self.name))
         while not self.__stop:
             try:
-                command: cc_lib.client.message.Envelope = self.__command_queue.get(timeout=30)
-                if time.time() - command.cmd_timestamp <= 10:
+                command: cc_lib.client.message.CommandEnvelope = self.__command_queue.get(timeout=30)
+                if time.time() - command.timestamp <= config.Controller.max_command_age:
                     logger.debug("{}: '{}'".format(self.name, command))
                     try:
                         if command.message.data:
@@ -59,7 +59,7 @@ class Worker(Thread):
                         cmd_resp = cc_lib.client.message.Message(json.dumps({"status": 1}))
                     command.message = cmd_resp
                     logger.debug("{}: '{}'".format(self.name, command))
-                    if command.cmd_strategy is cc_lib.client.CompletionStrategy.pessimistic:
+                    if command.completion_strategy is cc_lib.client.CompletionStrategy.pessimistic:
                         self.__client.sendResponse(command, asynchronous=True)
                 else:
                     logger.warning(
