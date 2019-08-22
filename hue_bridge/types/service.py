@@ -64,7 +64,7 @@ def hueBridgePut(d_number: str, data: dict):
             else:
                 return True, "unknown error"
         else:
-            return True, "{} {}".format(resp.status_code, resp.text)
+            return True, resp.status_code
     except exceptions.RequestException:
         return True, "could not send request to hue bridge"
 
