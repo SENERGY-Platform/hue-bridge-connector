@@ -105,7 +105,7 @@ class Controller(Thread):
                     else:
                         worker = self.__worker_pool[device.id]
                     worker.execute(command)
-                    time.sleep(0.05)
+                    time.sleep(config.Bridge.delay)
                 except KeyError:
                     logger.error("received command for unknown device '{}'".format(command.device_id))
             except cc_lib.client.CommandQueueEmptyError:

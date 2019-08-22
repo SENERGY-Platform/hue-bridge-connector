@@ -31,6 +31,7 @@ class HueConf:
         api_path = "api"
         api_key = None
         id = None
+        delay = 0.1
 
     @section
     class Cloud:
