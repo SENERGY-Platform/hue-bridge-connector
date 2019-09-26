@@ -19,7 +19,11 @@ if __name__ == '__main__':
 
 
 from simple_conf import configuration, section
-from os import getcwd
+from os import getcwd, makedirs
+from os.path import exists as path_exists
+
+
+user_dir = '{}/storage'.format(getcwd())
 
 
 @configuration
@@ -61,7 +65,10 @@ class HueConf:
         max_command_age = 15
 
 
-config = HueConf('bridge.conf', getcwd())
+if not path_exists(user_dir):
+    makedirs(user_dir)
+
+config = HueConf('bridge.conf', user_dir)
 
 
 if not all((config.Bridge.id, config.Bridge.api_path, config.Bridge.api_key, config.Cloud.host, config.Cloud.api_path)):
