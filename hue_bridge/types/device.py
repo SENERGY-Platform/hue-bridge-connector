@@ -28,16 +28,8 @@ import cc_lib
 
 
 class ExtendedColorLight(cc_lib.types.Device):
-    uri = config.Senergy.dt_extended_color_light
-    description = "Device type for Hue color lamp and lightstrip plus"
-    services = {
-        'setOn': SetOn,
-        'setOff': SetOff,
-        'setColor': SetColor,
-        'setBrightness': SetBrightness,
-        'setKelvin': SetKelvin,
-        'getStatus': GetStatus
-    }
+    device_type_id = config.Senergy.dt_extended_color_light
+    services = (SetOn, SetOff, SetColor, SetBrightness, SetKelvin, GetStatus)
 
     def __init__(self, id: str, name: str, model: str, state: dict, number: str):
         self.id = id
@@ -73,13 +65,8 @@ class ExtendedColorLight(cc_lib.types.Device):
 
 
 class OnOffPlugInUnit(cc_lib.types.Device):
-    uri = config.Senergy.dt_on_off_plug_in_unit
-    description = "Device type for On/Off plug-in unit"
-    services = {
-        'setOn': PlugSetOn,
-        'setOff': PlugSetOff,
-        'getStatus': PlugGetStatus
-    }
+    device_type_id = config.Senergy.dt_on_off_plug_in_unit
+    services = (PlugSetOn, PlugSetOff, PlugGetStatus)
 
     def __init__(self, id: str, name: str, model: str, state: dict, number: str):
         self.id = id
