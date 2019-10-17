@@ -123,11 +123,9 @@ def convertRGBToHSB(red, green, blue):
 #         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
+@cc_lib.types.Service
 class SetColor:
-    uri = config.Senergy.st_set_color
-    name = "Set Color"
-    description = "Set light color via Hue, Saturation and Brightness values."
+    local_id = "setColor"
 
     @staticmethod
     def task(device, hue: int, saturation: int, brightness: int, duration: float):
@@ -145,11 +143,9 @@ class SetColor:
         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
+@cc_lib.types.Service
 class SetOn:
-    uri = config.Senergy.st_set_on
-    name = "Set On"
-    description = "Turn on light."
+    local_id = "setOn"
 
     @staticmethod
     def task(device, duration):
@@ -159,11 +155,9 @@ class SetOn:
         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
+@cc_lib.types.Service
 class SetOff:
-    uri = config.Senergy.st_set_off
-    name = "Set Off"
-    description = "Turn off light."
+    local_id = "setOff"
 
     @staticmethod
     def task(device, duration):
@@ -173,11 +167,9 @@ class SetOff:
         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
+@cc_lib.types.Service
 class SetBrightness:
-    uri = config.Senergy.st_set_brightness
-    name = "Set Brightness"
-    description = "Set light brightness."
+    local_id = "setBrightness"
 
     @staticmethod
     def task(device, brightness, duration):
@@ -190,11 +182,9 @@ class SetBrightness:
         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
+@cc_lib.types.Service
 class SetKelvin:
-    uri = config.Senergy.st_set_kelvin
-    name = "Set Kelvin"
-    description = "Set light kelvin temperature and brightness."
+    local_id = "setKelvin"
 
     @staticmethod
     def task(device, kelvin, brightness, duration):
@@ -212,11 +202,9 @@ class SetKelvin:
         return {"status": int(err)}
 
 
-@cc_lib.types.sensor_service
+@cc_lib.types.Service
 class GetStatus:
-    uri = config.Senergy.st_get_status
-    name = "Get Status"
-    description = "Get light status parameters."
+    local_id = "getStatus"
 
     @staticmethod
     def task(device):
@@ -245,11 +233,9 @@ class GetStatus:
 ### On/Off plug-in unit ###
 
 
-@cc_lib.types.actuator_service
+@cc_lib.types.Service
 class PlugSetOn:
-    uri = config.Senergy.st_plug_set_on
-    name = "Set On"
-    description = "Turn on plug."
+    local_id = "setOn"
 
     @staticmethod
     def task(device):
@@ -259,11 +245,9 @@ class PlugSetOn:
         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
+@cc_lib.types.Service
 class PlugSetOff:
-    uri = config.Senergy.st_plug_set_off
-    name = "Set Off"
-    description = "Turn off plug."
+    local_id = "setOff"
 
     @staticmethod
     def task(device):
@@ -273,11 +257,9 @@ class PlugSetOff:
         return {"status": int(err)}
 
 
-@cc_lib.types.sensor_service
+@cc_lib.types.Service
 class PlugGetStatus:
-    uri = config.Senergy.st_plug_get_status
-    name = "Get Status"
-    description = "Get plug status parameters."
+    local_id = "getStatus"
 
     @staticmethod
     def task(device):
