@@ -1,7 +1,7 @@
+FROM python:3-alpine
+
 ARG branch
 ENV BRANCH=${branch}
-
-FROM python:3-alpine
 
 WORKDIR /usr/src/app
 
