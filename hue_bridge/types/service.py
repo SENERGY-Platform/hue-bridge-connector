@@ -123,8 +123,7 @@ def convertRGBToHSB(red, green, blue):
 #         return {"status": int(err)}
 
 
-@cc_lib.types.Service
-class SetColor:
+class SetColor(cc_lib.types.Service):
     local_id = "setColor"
 
     @staticmethod
@@ -143,8 +142,7 @@ class SetColor:
         return {"status": int(err)}
 
 
-@cc_lib.types.Service
-class SetOn:
+class SetOn(cc_lib.types.Service):
     local_id = "setOn"
 
     @staticmethod
@@ -155,8 +153,7 @@ class SetOn:
         return {"status": int(err)}
 
 
-@cc_lib.types.Service
-class SetOff:
+class SetOff(cc_lib.types.Service):
     local_id = "setOff"
 
     @staticmethod
@@ -167,8 +164,7 @@ class SetOff:
         return {"status": int(err)}
 
 
-@cc_lib.types.Service
-class SetBrightness:
+class SetBrightness(cc_lib.types.Service):
     local_id = "setBrightness"
 
     @staticmethod
@@ -182,8 +178,7 @@ class SetBrightness:
         return {"status": int(err)}
 
 
-@cc_lib.types.Service
-class SetKelvin:
+class SetKelvin(cc_lib.types.Service):
     local_id = "setKelvin"
 
     @staticmethod
@@ -202,8 +197,7 @@ class SetKelvin:
         return {"status": int(err)}
 
 
-@cc_lib.types.Service
-class GetStatus:
+class GetStatus(cc_lib.types.Service):
     local_id = "getStatus"
 
     @staticmethod
@@ -233,8 +227,7 @@ class GetStatus:
 ### On/Off plug-in unit ###
 
 
-@cc_lib.types.Service
-class PlugSetOn:
+class PlugSetOn(cc_lib.types.Service):
     local_id = "setOn"
 
     @staticmethod
@@ -245,8 +238,7 @@ class PlugSetOn:
         return {"status": int(err)}
 
 
-@cc_lib.types.Service
-class PlugSetOff:
+class PlugSetOff(cc_lib.types.Service):
     local_id = "setOff"
 
     @staticmethod
@@ -257,8 +249,7 @@ class PlugSetOff:
         return {"status": int(err)}
 
 
-@cc_lib.types.Service
-class PlugGetStatus:
+class PlugGetStatus(cc_lib.types.Service):
     local_id = "getStatus"
 
     @staticmethod
