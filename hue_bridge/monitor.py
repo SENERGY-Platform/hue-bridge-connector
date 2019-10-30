@@ -109,9 +109,6 @@ class Monitor(Thread):
             futures = list()
             for device_id in new_devices:
                 device = device_type_map[queried_devices[device_id][1]["product_type"]](device_id, **queried_devices[device_id][0])
-                for key, value in queried_devices[device_id][1].items():
-                    if not key == "product_type":
-                        device.addTag(key, value)
                 logger.info("found '{}' with id '{}'".format(device.name, device.id))
                 futures.append((device, self.__client.addDevice(device, asynchronous=True)))
             for device, future in futures:
