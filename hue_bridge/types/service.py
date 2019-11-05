@@ -15,7 +15,7 @@
 """
 
 
-__all__ = ('SetBrightness', 'SetOff', 'SetOn', 'SetKelvin', 'SetColor', 'GetStatus', 'PlugSetOn', 'PlugSetOff', 'PlugGetStatus')
+__all__ = ('SetPower', 'SetBrightness', 'SetKelvin', 'SetColor', 'GetStatus', 'PlugSetPower', 'PlugGetStatus')
 
 
 if __name__ == '__main__':
@@ -142,23 +142,34 @@ class SetColor(cc_lib.types.Service):
         return {"status": int(err)}
 
 
-class SetOn(cc_lib.types.Service):
-    local_id = "setOn"
+# class SetOn(cc_lib.types.Service):
+#     local_id = "setOn"
+#
+#     @staticmethod
+#     def task(device, duration):
+#         err, body = hueBridgePut(device.number, {"on": True, "transitiontime": int(duration * 10)})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+#         return {"status": int(err)}
+#
+#
+# class SetOff(cc_lib.types.Service):
+#     local_id = "setOff"
+#
+#     @staticmethod
+#     def task(device, duration):
+#         err, body = hueBridgePut(device.number, {"on": False, "transitiontime": int(duration * 10)})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+#         return {"status": int(err)}
+
+
+class SetPower(cc_lib.types.Service):
+    local_id = "setPower"
 
     @staticmethod
-    def task(device, duration):
-        err, body = hueBridgePut(device.number, {"on": True, "transitiontime": int(duration * 10)})
-        if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
-        return {"status": int(err)}
-
-
-class SetOff(cc_lib.types.Service):
-    local_id = "setOff"
-
-    @staticmethod
-    def task(device, duration):
-        err, body = hueBridgePut(device.number, {"on": False, "transitiontime": int(duration * 10)})
+    def task(device, power, duration):
+        err, body = hueBridgePut(device.number, {"on": power, "transitiontime": int(duration * 10)})
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
@@ -227,23 +238,34 @@ class GetStatus(cc_lib.types.Service):
 ### On/Off plug-in unit ###
 
 
-class PlugSetOn(cc_lib.types.Service):
-    local_id = "setOn"
+# class PlugSetOn(cc_lib.types.Service):
+#     local_id = "setOn"
+#
+#     @staticmethod
+#     def task(device):
+#         err, body = hueBridgePut(device.number, {"on": True})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+#         return {"status": int(err)}
+#
+#
+# class PlugSetOff(cc_lib.types.Service):
+#     local_id = "setOff"
+#
+#     @staticmethod
+#     def task(device):
+#         err, body = hueBridgePut(device.number, {"on": False})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+#         return {"status": int(err)}
+
+
+class PlugSetPower(cc_lib.types.Service):
+    local_id = "setPower"
 
     @staticmethod
-    def task(device):
-        err, body = hueBridgePut(device.number, {"on": True})
-        if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
-        return {"status": int(err)}
-
-
-class PlugSetOff(cc_lib.types.Service):
-    local_id = "setOff"
-
-    @staticmethod
-    def task(device):
-        err, body = hueBridgePut(device.number, {"on": False})
+    def task(device, power):
+        err, body = hueBridgePut(device.number, {"on": power})
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
         return {"status": int(err)}
