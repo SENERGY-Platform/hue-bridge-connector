@@ -21,7 +21,7 @@ if __name__ == '__main__':
     exit('Please use "client.py"')
 
 
-from .service import SetKelvin, SetColor, SetOn, SetOff, SetBrightness, GetStatus, PlugSetOn, PlugSetOff, PlugGetStatus
+from .service import SetPower, SetKelvin, SetColor, SetBrightness, GetStatus, PlugSetPower, PlugGetStatus
 from threading import Lock
 from ..configuration import config
 import cc_lib
@@ -29,7 +29,7 @@ import cc_lib
 
 class ExtendedColorLight(cc_lib.types.Device):
     device_type_id = config.Senergy.dt_extended_color_light
-    services = (SetOn, SetOff, SetColor, SetBrightness, SetKelvin, GetStatus)
+    services = (SetPower, SetColor, SetBrightness, SetKelvin, GetStatus)
 
     def __init__(self, id: str, name: str, model: str, state: dict, number: str):
         self.id = id
@@ -66,7 +66,7 @@ class ExtendedColorLight(cc_lib.types.Device):
 
 class OnOffPlugInUnit(cc_lib.types.Device):
     device_type_id = config.Senergy.dt_on_off_plug_in_unit
-    services = (PlugSetOn, PlugSetOff, PlugGetStatus)
+    services = (PlugSetPower, PlugGetStatus)
 
     def __init__(self, id: str, name: str, model: str, state: dict, number: str):
         self.id = id
