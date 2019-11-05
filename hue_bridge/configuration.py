@@ -53,7 +53,7 @@ class HueConf:
 
     @section
     class Controller:
-        max_command_age = 15
+        max_command_age = 180
 
 
 if not path_exists(user_dir):
