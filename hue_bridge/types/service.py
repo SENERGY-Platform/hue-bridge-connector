@@ -146,7 +146,7 @@ class SetColor(cc_lib.types.Service):
             }
         )
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
@@ -179,7 +179,7 @@ class SetPower(cc_lib.types.Service):
     def task(device, power, duration):
         err, body = hueBridgePut(device.number, {"on": power, "transitiontime": int(duration * 10)})
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
@@ -193,7 +193,7 @@ class SetBrightness(cc_lib.types.Service):
             {"on": True, "bri": round(brightness * 255 / 100), "transitiontime": int(duration * 10)}
         )
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
@@ -212,7 +212,7 @@ class SetKelvin(cc_lib.types.Service):
             }
         )
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
@@ -231,7 +231,7 @@ class GetStatus(cc_lib.types.Service):
             }
         err, body = hueBridgeGet(device.number)
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         else:
             hsb = convertRGBToHSB(*getConverter(device.model).xy_to_rgb(body["xy"][0], body["xy"][1]))
             payload["on"] = body["on"]
@@ -275,7 +275,7 @@ class PlugSetPower(cc_lib.types.Service):
     def task(device, power):
         err, body = hueBridgePut(device.number, {"on": power})
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
@@ -290,7 +290,7 @@ class PlugGetStatus(cc_lib.types.Service):
             }
         err, body = hueBridgeGet(device.number)
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         else:
             payload["on"] = body["on"]
         payload["status"] = int(err)
