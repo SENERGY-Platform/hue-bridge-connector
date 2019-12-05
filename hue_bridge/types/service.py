@@ -172,12 +172,23 @@ class SetColor(cc_lib.types.Service):
 #         return {"status": int(err)}
 
 
+# class SetPower(cc_lib.types.Service):
+#     local_id = "setPower"
+#
+#     @staticmethod
+#     def task(device, power, duration):
+#         err, body = hueBridgePut(device.number, {"on": power, "transitiontime": int(duration * 10)})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
+#         return {"status": int(err)}
+
+
 class SetPower(cc_lib.types.Service):
     local_id = "setPower"
 
     @staticmethod
-    def task(device, power, duration):
-        err, body = hueBridgePut(device.number, {"on": power, "transitiontime": int(duration * 10)})
+    def task(device, power):
+        err, body = hueBridgePut(device.number, {"on": power})
         if err:
             logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
