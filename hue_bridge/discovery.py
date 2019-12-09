@@ -30,6 +30,7 @@ from urllib3 import disable_warnings as urllib3DisableWarnings
 from urllib3.exceptions import InsecureRequestWarning as urllib3InsecureRequestWarning
 import time, io, socket, requests
 import http.client as HTTPclient
+from os import getenv
 
 logger = root_logger.getChild(__name__.split(".", 1)[-1])
 
@@ -40,22 +41,25 @@ def ping(host) -> bool:
 
 
 def getLocalIP() -> str:
-    sys_type = system().lower()
-    try:
-        if 'linux' in sys_type:
-            local_ip = check_output(['hostname', '-I']).decode()
-            local_ip = local_ip.replace(' ', '')
-            local_ip = local_ip.replace('\n', '')
-            return local_ip
-        elif 'darwin' in sys_type:
-            local_ip = gethostbyname(getfqdn())
-            if type(local_ip) is str and local_ip.count('.') == 3:
+    if config.RuntimeEnv.container:
+        return getenv("HOST_IP")
+    else:
+        sys_type = system().lower()
+        try:
+            if 'linux' in sys_type:
+                local_ip = check_output(['hostname', '-I']).decode()
+                local_ip = local_ip.replace(' ', '')
+                local_ip = local_ip.replace('\n', '')
                 return local_ip
-        else:
-            logger.critical("platform not supported")
-            raise Exception
-    except Exception as ex:
-        exit("could not get local ip - {}".format(ex))
+            elif 'darwin' in sys_type:
+                local_ip = gethostbyname(getfqdn())
+                if type(local_ip) is str and local_ip.count('.') == 3:
+                    return local_ip
+            else:
+                logger.critical("platform not supported")
+                raise Exception
+        except Exception as ex:
+            exit("could not get local ip - {}".format(ex))
     return str()
 
 
