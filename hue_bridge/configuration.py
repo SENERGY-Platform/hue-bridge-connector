@@ -30,6 +30,10 @@ user_dir = '{}/storage'.format(getcwd())
 class HueConf:
 
     @section
+    class RuntimeEnv:
+        container = False
+
+    @section
     class Bridge:
         host = None
         api_path = "api"
