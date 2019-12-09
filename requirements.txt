@@ -1,2 +1,2 @@
 rgbxy==0.5
-requests<=3
+requests<3
