@@ -41,11 +41,14 @@ def ping(host) -> bool:
 
 
 def getLocalIP() -> str:
-    if config.RuntimeEnv.container:
-        return getenv("HOST_IP")
-    else:
-        sys_type = system().lower()
-        try:
+    try:
+        if config.RuntimeEnv.container:
+            host_ip = getenv("HOST_IP")
+            if not host_ip:
+                raise Exception("environment variable 'HOST_IP' not set")
+            return host_ip
+        else:
+            sys_type = system().lower()
             if 'linux' in sys_type:
                 local_ip = check_output(['hostname', '-I']).decode()
                 local_ip = local_ip.replace(' ', '')
@@ -56,11 +59,10 @@ def getLocalIP() -> str:
                 if type(local_ip) is str and local_ip.count('.') == 3:
                     return local_ip
             else:
-                logger.critical("platform not supported")
-                raise Exception
-        except Exception as ex:
-            exit("could not get local ip - {}".format(ex))
-    return str()
+                raise Exception("platform not supported")
+    except Exception as ex:
+        logger.critical("could not get local ip - {}".format(ex))
+        exit()
 
 
 def getIpRange(local_ip) -> list:
