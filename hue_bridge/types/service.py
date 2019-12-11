@@ -26,7 +26,7 @@ from ..configuration import config
 from ..logger import root_logger
 from rgbxy import Converter, GamutB, GamutC
 from requests import put, get, exceptions
-import cc_lib, colorsys
+import cc_lib, colorsys, datetime
 
 
 logger = root_logger.getChild(__name__.split(".", 1)[-1])
@@ -238,7 +238,8 @@ class GetStatus(cc_lib.types.Service):
                 "hue": 0,
                 "saturation": 0,
                 "brightness": 0,
-                "kelvin": 0
+                "kelvin": 0,
+                "time": "{}Z".format(datetime.datetime.utcnow().isoformat())
             }
         err, body = hueBridgeGet(device.number)
         if err:
@@ -297,7 +298,8 @@ class PlugGetStatus(cc_lib.types.Service):
     def task(device):
         payload = {
                 "status": 0,
-                "on": False
+                "on": False,
+                "time": "{}Z".format(datetime.datetime.utcnow().isoformat())
             }
         err, body = hueBridgeGet(device.number)
         if err:
