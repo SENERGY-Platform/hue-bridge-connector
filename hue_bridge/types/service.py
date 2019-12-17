@@ -15,7 +15,7 @@
 """
 
 
-__all__ = ('SetBrightness', 'SetOff', 'SetOn', 'SetKelvin', 'SetColor', 'GetStatus', 'PlugSetOn', 'PlugSetOff', 'PlugGetStatus')
+__all__ = ('SetPower', 'SetBrightness', 'SetKelvin', 'SetColor', 'GetStatus', 'PlugSetPower', 'PlugGetStatus')
 
 
 if __name__ == '__main__':
@@ -24,9 +24,9 @@ if __name__ == '__main__':
 
 from ..configuration import config
 from ..logger import root_logger
-from rgbxy import Converter, get_light_gamut
+from rgbxy import Converter, GamutB, GamutC
 from requests import put, get, exceptions
-import cc_lib, colorsys
+import cc_lib, colorsys, datetime
 
 
 logger = root_logger.getChild(__name__.split(".", 1)[-1])
@@ -34,9 +34,17 @@ logger = root_logger.getChild(__name__.split(".", 1)[-1])
 converter_pool = dict()
 
 
+def getGamut(model_id):
+    # https://developers.meethue.com/develop/hue-api/supported-devices/
+    if model_id in ("LCT001", "LCT007", "LCT002", "LCT003", "LLM001"):
+        return GamutB
+    elif model_id in ("LCT010", "LCT014", "LCT015", "LCT016", "LCT011", "LLC020", "LST002", "LCT012"):
+        return GamutC
+
+
 def getConverter(model: str):
     if not model in converter_pool:
-        converter = Converter(get_light_gamut(model))
+        converter = Converter(getGamut(model))
         converter_pool[model] = converter
         return converter
     return converter_pool[model]
@@ -123,11 +131,8 @@ def convertRGBToHSB(red, green, blue):
 #         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
-class SetColor:
-    uri = config.Senergy.st_set_color
-    name = "Set Color"
-    description = "Set light color via Hue, Saturation and Brightness values."
+class SetColor(cc_lib.types.Service):
+    local_id = "setColor"
 
     @staticmethod
     def task(device, hue: int, saturation: int, brightness: int, duration: float):
@@ -141,43 +146,56 @@ class SetColor:
             }
         )
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
-class SetOn:
-    uri = config.Senergy.st_set_on
-    name = "Set On"
-    description = "Turn on light."
+# class SetOn(cc_lib.types.Service):
+#     local_id = "setOn"
+#
+#     @staticmethod
+#     def task(device, duration):
+#         err, body = hueBridgePut(device.number, {"on": True, "transitiontime": int(duration * 10)})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+#         return {"status": int(err)}
+#
+#
+# class SetOff(cc_lib.types.Service):
+#     local_id = "setOff"
+#
+#     @staticmethod
+#     def task(device, duration):
+#         err, body = hueBridgePut(device.number, {"on": False, "transitiontime": int(duration * 10)})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+#         return {"status": int(err)}
+
+
+# class SetPower(cc_lib.types.Service):
+#     local_id = "setPower"
+#
+#     @staticmethod
+#     def task(device, power, duration):
+#         err, body = hueBridgePut(device.number, {"on": power, "transitiontime": int(duration * 10)})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
+#         return {"status": int(err)}
+
+
+class SetPower(cc_lib.types.Service):
+    local_id = "setPower"
 
     @staticmethod
-    def task(device, duration):
-        err, body = hueBridgePut(device.number, {"on": True, "transitiontime": int(duration * 10)})
+    def task(device, power):
+        err, body = hueBridgePut(device.number, {"on": power})
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
-class SetOff:
-    uri = config.Senergy.st_set_off
-    name = "Set Off"
-    description = "Turn off light."
-
-    @staticmethod
-    def task(device, duration):
-        err, body = hueBridgePut(device.number, {"on": False, "transitiontime": int(duration * 10)})
-        if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
-        return {"status": int(err)}
-
-
-@cc_lib.types.actuator_service
-class SetBrightness:
-    uri = config.Senergy.st_set_brightness
-    name = "Set Brightness"
-    description = "Set light brightness."
+class SetBrightness(cc_lib.types.Service):
+    local_id = "setBrightness"
 
     @staticmethod
     def task(device, brightness, duration):
@@ -186,15 +204,12 @@ class SetBrightness:
             {"on": True, "bri": round(brightness * 255 / 100), "transitiontime": int(duration * 10)}
         )
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
-class SetKelvin:
-    uri = config.Senergy.st_set_kelvin
-    name = "Set Kelvin"
-    description = "Set light kelvin temperature and brightness."
+class SetKelvin(cc_lib.types.Service):
+    local_id = "setKelvin"
 
     @staticmethod
     def task(device, kelvin, brightness, duration):
@@ -208,15 +223,12 @@ class SetKelvin:
             }
         )
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
-@cc_lib.types.sensor_service
-class GetStatus:
-    uri = config.Senergy.st_get_status
-    name = "Get Status"
-    description = "Get light status parameters."
+class GetStatus(cc_lib.types.Service):
+    local_id = "getStatus"
 
     @staticmethod
     def task(device):
@@ -226,11 +238,12 @@ class GetStatus:
                 "hue": 0,
                 "saturation": 0,
                 "brightness": 0,
-                "kelvin": 0
+                "kelvin": 0,
+                "time": "{}Z".format(datetime.datetime.utcnow().isoformat())
             }
         err, body = hueBridgeGet(device.number)
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         else:
             hsb = convertRGBToHSB(*getConverter(device.model).xy_to_rgb(body["xy"][0], body["xy"][1]))
             payload["on"] = body["on"]
@@ -245,49 +258,52 @@ class GetStatus:
 ### On/Off plug-in unit ###
 
 
-@cc_lib.types.actuator_service
-class PlugSetOn:
-    uri = config.Senergy.st_plug_set_on
-    name = "Set On"
-    description = "Turn on plug."
+# class PlugSetOn(cc_lib.types.Service):
+#     local_id = "setOn"
+#
+#     @staticmethod
+#     def task(device):
+#         err, body = hueBridgePut(device.number, {"on": True})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+#         return {"status": int(err)}
+#
+#
+# class PlugSetOff(cc_lib.types.Service):
+#     local_id = "setOff"
+#
+#     @staticmethod
+#     def task(device):
+#         err, body = hueBridgePut(device.number, {"on": False})
+#         if err:
+#             logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+#         return {"status": int(err)}
+
+
+class PlugSetPower(cc_lib.types.Service):
+    local_id = "setPower"
 
     @staticmethod
-    def task(device):
-        err, body = hueBridgePut(device.number, {"on": True})
+    def task(device, power):
+        err, body = hueBridgePut(device.number, {"on": power})
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         return {"status": int(err)}
 
 
-@cc_lib.types.actuator_service
-class PlugSetOff:
-    uri = config.Senergy.st_plug_set_off
-    name = "Set Off"
-    description = "Turn off plug."
-
-    @staticmethod
-    def task(device):
-        err, body = hueBridgePut(device.number, {"on": False})
-        if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
-        return {"status": int(err)}
-
-
-@cc_lib.types.sensor_service
-class PlugGetStatus:
-    uri = config.Senergy.st_plug_get_status
-    name = "Get Status"
-    description = "Get plug status parameters."
+class PlugGetStatus(cc_lib.types.Service):
+    local_id = "getStatus"
 
     @staticmethod
     def task(device):
         payload = {
                 "status": 0,
-                "on": False
+                "on": False,
+                "time": "{}Z".format(datetime.datetime.utcnow().isoformat())
             }
         err, body = hueBridgeGet(device.number)
         if err:
-            logger.error("'{}' for '{}' failed - {}".format(__class__.name, device.id, body))
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
         else:
             payload["on"] = body["on"]
         payload["status"] = int(err)

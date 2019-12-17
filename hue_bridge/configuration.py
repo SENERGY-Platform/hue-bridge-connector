@@ -30,12 +30,16 @@ user_dir = '{}/storage'.format(getcwd())
 class HueConf:
 
     @section
+    class RuntimeEnv:
+        container = False
+
+    @section
     class Bridge:
         host = None
         api_path = "api"
         api_key = None
         id = None
-        delay = 0.1
+        delay = 0.25
 
     @section
     class Cloud:
@@ -46,15 +50,6 @@ class HueConf:
     class Senergy:
         dt_extended_color_light = None
         dt_on_off_plug_in_unit = None
-        st_set_color = None
-        st_set_kelvin = None
-        st_set_on = None
-        st_set_off = None
-        st_set_brightness = None
-        st_get_status = None
-        st_plug_set_on = None
-        st_plug_set_off = None
-        st_plug_get_status = None
 
     @section
     class Logger:
@@ -62,7 +57,7 @@ class HueConf:
 
     @section
     class Controller:
-        max_command_age = 15
+        max_command_age = 180
 
 
 if not path_exists(user_dir):
@@ -74,19 +69,5 @@ config = HueConf('bridge.conf', user_dir)
 if not all((config.Bridge.id, config.Bridge.api_path, config.Bridge.api_key, config.Cloud.host, config.Cloud.api_path)):
     exit('Please provide Hue Bridge information')
 
-if not all(
-        (
-                config.Senergy.dt_extended_color_light,
-                config.Senergy.st_set_color,
-                config.Senergy.st_set_kelvin,
-                config.Senergy.st_set_on,
-                config.Senergy.st_set_off,
-                config.Senergy.st_set_brightness,
-                config.Senergy.st_get_status,
-                config.Senergy.dt_on_off_plug_in_unit,
-                config.Senergy.st_plug_set_on,
-                config.Senergy.st_plug_set_off,
-                config.Senergy.st_plug_get_status
-        )
-):
-    exit('Please provide a SENERGY device and service types')
+if not all((config.Senergy.dt_extended_color_light, config.Senergy.dt_on_off_plug_in_unit,)):
+    exit('Please provide a SENERGY device types')
