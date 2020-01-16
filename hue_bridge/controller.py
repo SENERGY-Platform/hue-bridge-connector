@@ -60,7 +60,6 @@ class Worker(Thread):
                     command.message = cmd_resp
                     logger.debug("{}: '{}'".format(self.name, command))
                     if command.completion_strategy == cc_lib.client.CompletionStrategy.pessimistic:
-
                         self.__client.sendResponse(command, asynchronous=True)
                 else:
                     logger.warning(
