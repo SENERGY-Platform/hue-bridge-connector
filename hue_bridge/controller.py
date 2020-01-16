@@ -114,9 +114,9 @@ class Controller(Thread):
                     garbage_collector_time = time.time()
 
     def __collectGarbage(self):
-        logger.debug("running garbage collector ...")
+        # logger.debug("running garbage collector ...")
         garbage_workers = set(self.__worker_pool) - set(self.__device_manager.devices)
-        logger.debug("collected '{}' workers".format(len(garbage_workers)))
+        # logger.debug("collected '{}' workers".format(len(garbage_workers)))
         for worker_id in garbage_workers:
             worker = self.__worker_pool[worker_id]
             logger.debug("stopping '{}'".format(worker.name))
