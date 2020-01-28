@@ -32,6 +32,7 @@ class HueConf:
     @section
     class RuntimeEnv:
         container = False
+        max_start_delay = 30
 
     @section
     class Bridge:
