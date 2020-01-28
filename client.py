@@ -15,7 +15,6 @@
 """
 
 
-from hue_bridge.logger import root_logger
 from hue_bridge.configuration import config
 from hue_bridge.discovery import discoverBridge
 from hue_bridge.device_manager import DeviceManager
@@ -25,7 +24,6 @@ from time import sleep
 import cc_lib
 
 
-logger = root_logger.getChild(__name__)
 
 device_manager = DeviceManager()
 
