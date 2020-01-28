@@ -20,9 +20,13 @@ from hue_bridge.discovery import discoverBridge
 from hue_bridge.device_manager import DeviceManager
 from hue_bridge.monitor import Monitor
 from hue_bridge.controller import Controller
-from time import sleep
-import cc_lib
+import time, random, cc_lib
 
+
+if config.RuntimeEnv.max_start_delay > 0:
+    delay = random.randint(1, config.RuntimeEnv.max_start_delay)
+    print("delaying start for {}s".format(delay))
+    time.sleep(delay)
 
 
 device_manager = DeviceManager()
@@ -52,7 +56,7 @@ if __name__ == '__main__':
             connector_client.initHub()
             break
         except cc_lib.client.HubInitializationError:
-            sleep(10)
+            time.sleep(10)
     connector_client.connect(reconnect=True)
     bridge_monitor.start()
     bridge_controller.start()
