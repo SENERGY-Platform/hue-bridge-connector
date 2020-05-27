@@ -140,7 +140,7 @@ class SetColor(cc_lib.types.Service):
             device.number,
             {
                 "on": True,
-                "xy": getConverter(device.model).rgb_to_xy(*convertHSBToRGB(hue, saturation, brightness)),
+                "xy": getConverter(device.model).rgb_to_xy(*convertHSBToRGB(hue, saturation, brightness or 1)),
                 "bri": round(brightness * 255 / 100),
                 "transitiontime": int(duration * 10)
             }
