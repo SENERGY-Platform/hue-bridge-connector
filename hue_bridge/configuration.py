@@ -43,9 +43,8 @@ class HueConf:
         delay = 0.25
 
     @section
-    class Cloud:
-        host = "www.meethue.com"
-        api_path = "api"
+    class Discovery:
+        NUPnP = "https://discovery.meethue.com/"
 
     @section
     class Senergy:
@@ -68,7 +67,7 @@ if not path_exists(user_dir):
 config = HueConf('bridge.conf', user_dir)
 
 
-if not all((config.Bridge.id, config.Bridge.api_path, config.Bridge.api_key, config.Cloud.host, config.Cloud.api_path)):
+if not all((config.Bridge.id, config.Bridge.api_path, config.Bridge.api_key, config.Discovery.NUPnP)):
     exit('Please provide Hue Bridge information')
 
 if not all((config.Senergy.dt_extended_color_light, config.Senergy.dt_on_off_plug_in_unit,)):
