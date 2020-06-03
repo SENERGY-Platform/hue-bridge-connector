@@ -15,7 +15,7 @@
 """
 
 
-__all__ = ('SetPower', 'SetBrightness', 'SetKelvin', 'SetColor', 'GetStatus', 'PlugSetPower', 'PlugGetStatus')
+__all__ = ('SetPower', 'SetBrightness', 'SetKelvin', 'SetColor', 'GetStatus', 'PlugSetPower', 'PlugGetStatus', 'GetStatusCL')
 
 
 if __name__ == '__main__':
@@ -253,6 +253,32 @@ class GetStatus(cc_lib.types.Service):
             payload["saturation"] = hsb[1]
             payload["brightness"] = hsb[2]
             payload["kelvin"] = round(round(1000000 / body["ct"]) / 10) * 10
+        payload["status"] = int(err)
+        return payload
+
+
+class GetStatusCL(cc_lib.types.Service):
+    local_id = "getStatus"
+
+    @staticmethod
+    def task(device):
+        payload = {
+                "status": 0,
+                "on": False,
+                "hue": 0,
+                "saturation": 0,
+                "brightness": 0,
+                "time": "{}Z".format(datetime.datetime.utcnow().isoformat())
+            }
+        err, body = hueBridgeGet(device.number)
+        if err:
+            logger.error("'{}' for '{}' failed - {}".format(__class__.__name__, device.id, body))
+        else:
+            hsb = convertRGBToHSB(*getConverter(device.model).xy_to_rgb(body["xy"][0], body["xy"][1]))
+            payload["on"] = body["on"]
+            payload["hue"] = hsb[0]
+            payload["saturation"] = hsb[1]
+            payload["brightness"] = hsb[2]
         payload["status"] = int(err)
         return payload
 
