@@ -108,9 +108,12 @@ class Monitor(Thread):
         if new_devices:
             futures = list()
             for device_id in new_devices:
-                device = device_type_map[queried_devices[device_id][1]["product_type"]](device_id, **queried_devices[device_id][0])
-                logger.info("found '{}' with id '{}'".format(device.name, device.id))
-                futures.append((device, self.__client.addDevice(device, asynchronous=True)))
+                try:
+                    device = device_type_map[queried_devices[device_id][1]["product_type"]](device_id, **queried_devices[device_id][0])
+                    logger.info("found '{}' with id '{}'".format(device.name, device.id))
+                    futures.append((device, self.__client.addDevice(device, asynchronous=True)))
+                except KeyError:
+                    logger.error("can't add '{}' - unsupported device type '{}'".format(device_id, queried_devices[device_id][1]["product_type"]))
             for device, future in futures:
                 future.wait()
                 try:
