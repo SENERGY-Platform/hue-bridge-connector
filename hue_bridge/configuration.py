@@ -44,7 +44,7 @@ class HueConf:
 
     @section
     class Discovery:
-        NUPnP = "https://discovery.meethue.com/"
+        nupnp = "https://discovery.meethue.com/"
 
     @section
     class Senergy:
