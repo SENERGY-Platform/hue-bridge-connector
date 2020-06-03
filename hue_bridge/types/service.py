@@ -38,10 +38,13 @@ def getGamut(model_id):
     # https://developers.meethue.com/develop/hue-api/supported-devices/
     if model_id in ("LCT001", "LCT007", "LCT002", "LCT003", "LLM001"):
         return GamutB
-    if model_id in ("LCT010", "LCT014", "LCT015", "LCT016", "LCT011", "LLC020", "LST002", "LCT012"):
+    elif model_id in ("LCT010", "LCT014", "LCT015", "LCT016", "LCT011", "LLC020", "LST002", "LCT012", "LCT024"):
         return GamutC
-    if model_id in ("LLC010", "LLC006", "LST001", "LLC011", "LLC012", "LLC005", "LLC007", "LLC014"):
+    elif model_id in ("LLC010", "LLC006", "LST001", "LLC011", "LLC012", "LLC005", "LLC007", "LLC014"):
         return GamutA
+    else:
+        logger.warning("Model '{}' not supported - defaulting to Gamut C")
+        return GamutC
 
 
 def getConverter(model: str):
