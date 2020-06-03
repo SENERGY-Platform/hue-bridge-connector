@@ -104,7 +104,7 @@ def discoverHosts() -> list:
 
 def discoverNUPnP() -> str:
     try:
-        response = requests.get('https://{}/{}/nupnp'.format(config.Cloud.host, config.Cloud.api_path))
+        response = requests.get(config.Discovery.NUPnP)
         if response.status_code == 200:
             host_list = response.json()
             for host in host_list:
