@@ -51,6 +51,7 @@ class HueConf:
     class Senergy:
         dt_extended_color_light = None
         dt_on_off_plug_in_unit = None
+        dt_color_light = None
 
     @section
     class Logger:
